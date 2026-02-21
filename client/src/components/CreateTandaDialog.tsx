@@ -1,16 +1,16 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { calculateEnergy, getAllSingers, getStyleLabel, getEraBracket, sameEraBracket, sameStyleCategory, getOrchestraProfile } from "@/lib/orchestraData";
-import { getOrchestras } from "@/lib/orchestraService";
+import { getStyleLabel, sameEraBracket, sameStyleCategory } from "@/lib/orchestraData";
+import { getOrchestras, calculateEnergy, getOrchestraProfile, calculateEnergyFromProfile } from "@/lib/orchestraService";
 import { Plus, X, AlertTriangle } from "lucide-react";
 import { TypeBadge } from "./TypeBadge";
 import { EnergyBar } from "./EnergyBar";
-import type { TandaType, TandaMode } from "@shared/schema";
+import type { TandaType, TandaMode, OrchestraProfile } from "@shared/schema";
 import { useLanguage } from "@/hooks/useLanguage";
 
 interface CreateTandaDialogProps {
@@ -58,12 +58,14 @@ function getMixedValidationErrors(entries: MixedOrchestraEntry[], t: (key: strin
   return errors;
 }
 
+const TYPE_MAP: Record<string, TandaType> = { T: "tango", V: "vals", M: "milonga" };
+
 export function CreateTandaDialog({ onCreateTanda, trigger }: CreateTandaDialogProps) {
   const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const [tandaMode, setTandaMode] = useState<TandaMode>("standard");
   const [orchestraId, setOrchestraId] = useState("");
-  const [singer, setSinger] = useState("");
+  const [selectedSinger, setSelectedSinger] = useState("");
   const [type, setType] = useState<TandaType>("tango");
   const [trackCount, setTrackCount] = useState(4);
   const [energyOverride, setEnergyOverride] = useState<number | null>(null);
@@ -72,17 +74,45 @@ export function CreateTandaDialog({ onCreateTanda, trigger }: CreateTandaDialogP
 
   const orchestras = getOrchestras();
   const selectedOrchestra = useMemo(() => orchestras.find((o) => o.id === orchestraId), [orchestras, orchestraId]);
-  const singers = useMemo(() => (orchestraId ? getAllSingers(orchestraId) : []), [orchestraId]);
-  const calculatedEnergy = useMemo(
-    () => (orchestraId ? calculateEnergy(orchestraId, type) : 5),
-    [orchestraId, type]
-  );
+
+  const selectedProfile = useMemo(() => {
+    if (!selectedOrchestra) return undefined;
+    if (selectedSinger) {
+      return selectedOrchestra.profiles.find((p) => p.singer === selectedSinger);
+    }
+    return selectedOrchestra.profiles[0];
+  }, [selectedOrchestra, selectedSinger]);
+
+  const availableTypes = useMemo((): TandaType[] => {
+    if (!selectedProfile) return ["tango", "vals", "milonga"];
+    return selectedProfile.types
+      .map((t) => TYPE_MAP[t])
+      .filter(Boolean);
+  }, [selectedProfile]);
+
+  useEffect(() => {
+    if (selectedProfile && !availableTypes.includes(type)) {
+      setType(availableTypes[0] || "tango");
+      setEnergyOverride(null);
+    }
+  }, [selectedProfile, availableTypes, type]);
+
+  useEffect(() => {
+    if (selectedOrchestra && selectedOrchestra.profiles.length === 1) {
+      setSelectedSinger(selectedOrchestra.profiles[0].singer);
+    }
+  }, [selectedOrchestra]);
+
+  const calculatedEnergy = useMemo(() => {
+    if (!selectedProfile) return 5;
+    return calculateEnergyFromProfile(selectedProfile.energy, type);
+  }, [selectedProfile, type]);
+
   const finalEnergy = energyOverride !== null ? energyOverride : calculatedEnergy;
 
   const mixedAvgEnergy = useMemo(() => {
     if (mixedEntries.length === 0) return 5;
-    const avg = mixedEntries.reduce((sum, e) => sum + e.energy, 0) / mixedEntries.length;
-    return avg;
+    return mixedEntries.reduce((sum, e) => sum + e.energy, 0) / mixedEntries.length;
   }, [mixedEntries]);
   const mixedFinalEnergy = energyOverride !== null ? energyOverride : mixedAvgEnergy;
 
@@ -103,7 +133,7 @@ export function CreateTandaDialog({ onCreateTanda, trigger }: CreateTandaDialogP
 
   const resetForm = () => {
     setOrchestraId("");
-    setSinger("");
+    setSelectedSinger("");
     setType("tango");
     setTrackCount(4);
     setEnergyOverride(null);
@@ -129,17 +159,16 @@ export function CreateTandaDialog({ onCreateTanda, trigger }: CreateTandaDialogP
 
   const handleSubmit = () => {
     if (tandaMode === "standard") {
-      if (!orchestraId) return;
-      const profile = selectedOrchestra?.profiles[0];
+      if (!orchestraId || !selectedProfile) return;
       onCreateTanda({
         orchestraId,
         tandaMode: "standard",
-        singer: singer || null,
+        singer: selectedSinger || null,
         type,
         trackCount,
         energy: Math.max(1, Math.min(10, finalEnergy)),
-        style: profile?.style || "",
-        era: profile?.era || "",
+        style: selectedProfile.style,
+        era: selectedProfile.era,
       });
     } else {
       if (mixedEntries.length < 2 || mixedErrors.length > 0) return;
@@ -162,7 +191,7 @@ export function CreateTandaDialog({ onCreateTanda, trigger }: CreateTandaDialogP
   };
 
   const canSubmit = tandaMode === "standard"
-    ? !!orchestraId
+    ? !!orchestraId && !!selectedProfile
     : mixedEntries.length >= 2 && mixedErrors.length === 0;
 
   return (
@@ -189,7 +218,7 @@ export function CreateTandaDialog({ onCreateTanda, trigger }: CreateTandaDialogP
                   onClick={() => {
                     setTandaMode(mode);
                     setOrchestraId("");
-                    setSinger("");
+                    setSelectedSinger("");
                     setEnergyOverride(null);
                     setMixedEntries([]);
                   }}
@@ -203,56 +232,6 @@ export function CreateTandaDialog({ onCreateTanda, trigger }: CreateTandaDialogP
                   {t(`tanda_mode_${mode}`)}
                 </button>
               ))}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label className="text-xs text-muted-foreground mb-1.5 block">{t("type")}</Label>
-              <div className="flex gap-1.5">
-                {(["tango", "vals", "milonga"] as TandaType[]).map((tp) => (
-                  <button
-                    key={tp}
-                    onClick={() => {
-                      setType(tp);
-                      setEnergyOverride(null);
-                      if (tandaMode === "mixed") {
-                        setMixedEntries((prev) =>
-                          prev.map((e) => ({
-                            ...e,
-                            energy: calculateEnergy(e.orchestraId, tp),
-                          }))
-                        );
-                      }
-                    }}
-                    className={`flex-1 py-1.5 rounded-md text-xs font-medium transition-all ${
-                      type === tp ? "ring-1 ring-ring" : "opacity-60"
-                    }`}
-                    data-testid={`button-type-${tp}`}
-                  >
-                    <TypeBadge type={tp} size="sm" />
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <Label className="text-xs text-muted-foreground mb-1.5 block">{t("tracks")}</Label>
-              <div className="flex gap-1.5">
-                {[3, 4].map((n) => (
-                  <button
-                    key={n}
-                    onClick={() => setTrackCount(n)}
-                    className={`flex-1 py-1.5 rounded-md text-sm font-medium border transition-all ${
-                      trackCount === n
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border/50"
-                    }`}
-                    data-testid={`button-tracks-${n}`}
-                  >
-                    {n}
-                  </button>
-                ))}
-              </div>
             </div>
           </div>
 
@@ -273,6 +252,7 @@ export function CreateTandaDialog({ onCreateTanda, trigger }: CreateTandaDialogP
                       key={o.id}
                       onClick={() => {
                         setOrchestraId(o.id);
+                        setSelectedSinger("");
                         setSearch("");
                         setEnergyOverride(null);
                       }}
@@ -294,24 +274,80 @@ export function CreateTandaDialog({ onCreateTanda, trigger }: CreateTandaDialogP
 
               {selectedOrchestra && (
                 <>
-                  {singers.length > 0 && (
+                  {selectedOrchestra.profiles.length > 1 && (
                     <div>
                       <Label className="text-xs text-muted-foreground mb-1.5 block">{t("singer_optional")}</Label>
-                      <Select value={singer} onValueChange={setSinger}>
+                      <Select
+                        value={selectedSinger}
+                        onValueChange={(v) => {
+                          setSelectedSinger(v);
+                          setEnergyOverride(null);
+                        }}
+                      >
                         <SelectTrigger data-testid="select-singer">
-                          <SelectValue placeholder={t("instrumental")} />
+                          <SelectValue placeholder={t("select_singer_config")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="instrumental">{t("instrumental")}</SelectItem>
-                          {singers.map((s) => (
-                            <SelectItem key={s} value={s}>
-                              {s}
+                          {selectedOrchestra.profiles.map((p) => (
+                            <SelectItem key={p.singer} value={p.singer}>
+                              {p.singer} · {p.era}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
                   )}
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs text-muted-foreground mb-1.5 block">{t("type")}</Label>
+                      <div className="flex gap-1.5">
+                        {(["tango", "vals", "milonga"] as TandaType[]).map((tp) => {
+                          const isAvailable = availableTypes.includes(tp);
+                          return (
+                            <button
+                              key={tp}
+                              onClick={() => {
+                                if (!isAvailable) return;
+                                setType(tp);
+                                setEnergyOverride(null);
+                              }}
+                              disabled={!isAvailable}
+                              className={`flex-1 py-1.5 rounded-md text-xs font-medium transition-all ${
+                                !isAvailable
+                                  ? "opacity-20 cursor-not-allowed"
+                                  : type === tp
+                                    ? "ring-1 ring-ring"
+                                    : "opacity-60"
+                              }`}
+                              data-testid={`button-type-${tp}`}
+                            >
+                              <TypeBadge type={tp} size="sm" />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground mb-1.5 block">{t("tracks")}</Label>
+                      <div className="flex gap-1.5">
+                        {[3, 4].map((n) => (
+                          <button
+                            key={n}
+                            onClick={() => setTrackCount(n)}
+                            className={`flex-1 py-1.5 rounded-md text-sm font-medium border transition-all ${
+                              trackCount === n
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border/50"
+                            }`}
+                            data-testid={`button-tracks-${n}`}
+                          >
+                            {n}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
 
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
@@ -333,15 +369,65 @@ export function CreateTandaDialog({ onCreateTanda, trigger }: CreateTandaDialogP
                     />
                   </div>
 
-                  <div className="text-xs text-muted-foreground p-2 rounded-md bg-accent/50">
-                    <p className="font-medium mb-0.5">{getStyleLabel(selectedOrchestra.profiles[0].style)}</p>
-                    <p className="italic">{selectedOrchestra.profiles[0].dj_notes}</p>
-                  </div>
+                  {selectedProfile && (
+                    <div className="text-xs text-muted-foreground p-2 rounded-md bg-accent/50">
+                      <p className="font-medium mb-0.5">{getStyleLabel(selectedProfile.style)}</p>
+                      <p className="italic">{selectedProfile.dj_notes}</p>
+                    </div>
+                  )}
                 </>
               )}
             </>
           ) : (
             <>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-1.5 block">{t("type")}</Label>
+                  <div className="flex gap-1.5">
+                    {(["tango", "vals", "milonga"] as TandaType[]).map((tp) => (
+                      <button
+                        key={tp}
+                        onClick={() => {
+                          setType(tp);
+                          setEnergyOverride(null);
+                          setMixedEntries((prev) =>
+                            prev.map((e) => ({
+                              ...e,
+                              energy: calculateEnergy(e.orchestraId, tp),
+                            }))
+                          );
+                        }}
+                        className={`flex-1 py-1.5 rounded-md text-xs font-medium transition-all ${
+                          type === tp ? "ring-1 ring-ring" : "opacity-60"
+                        }`}
+                        data-testid={`button-type-${tp}`}
+                      >
+                        <TypeBadge type={tp} size="sm" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-1.5 block">{t("tracks")}</Label>
+                  <div className="flex gap-1.5">
+                    {[3, 4].map((n) => (
+                      <button
+                        key={n}
+                        onClick={() => setTrackCount(n)}
+                        className={`flex-1 py-1.5 rounded-md text-sm font-medium border transition-all ${
+                          trackCount === n
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border/50"
+                        }`}
+                        data-testid={`button-tracks-${n}`}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <Label className="text-xs text-muted-foreground mb-1.5 block">{t("mixed_orchestras")}</Label>
 

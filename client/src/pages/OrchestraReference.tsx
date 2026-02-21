@@ -24,10 +24,12 @@ export default function OrchestraReference() {
 
   const filtered = useMemo(() => {
     return orchestras.filter((o) => {
+      const searchLower = search.toLowerCase();
       const matchesSearch =
         !search ||
-        o.name.toLowerCase().includes(search.toLowerCase()) ||
-        o.nickname?.toLowerCase().includes(search.toLowerCase());
+        o.name.toLowerCase().includes(searchLower) ||
+        o.nickname?.toLowerCase().includes(searchLower) ||
+        o.profiles.some((p) => p.singer.toLowerCase().includes(searchLower));
 
       const matchesStyle =
         styleFilter === "all" || o.profiles.some((p) => p.style === styleFilter);
@@ -219,16 +221,25 @@ function OrchestraCard({
           {orchestra.profiles.map((profile, i) => (
             <div key={i} className="space-y-2">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-serif font-medium text-sm">{profile.era_label || profile.era}</span>
+                <span className="font-serif font-medium text-sm">{profile.singer}</span>
                 <span className="text-xs text-muted-foreground">({profile.era})</span>
                 <Badge variant="secondary" className="text-[10px]">
                   {getStyleLabel(profile.style)}
                 </Badge>
-                {profile.confidence && (
-                  <span className="text-[10px] text-muted-foreground/60">
-                    {t("confidence")}: {profile.confidence}
-                  </span>
-                )}
+                <div className="flex gap-0.5">
+                  {profile.types.map((tp) => (
+                    <span
+                      key={tp}
+                      className="text-[10px] px-1 py-0.5 rounded font-medium"
+                      style={{
+                        backgroundColor: tp === "T" ? "#ef444420" : tp === "V" ? "#3b82f620" : "#22c55e20",
+                        color: tp === "T" ? "#ef4444" : tp === "V" ? "#3b82f6" : "#22c55e",
+                      }}
+                    >
+                      {tp}
+                    </span>
+                  ))}
+                </div>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
@@ -249,26 +260,6 @@ function OrchestraCard({
                   <p className="font-medium capitalize">{profile.mood}</p>
                 </div>
               </div>
-
-              {profile.key_singers && profile.key_singers.length > 0 && (
-                <div>
-                  <span className="text-xs text-muted-foreground">{t("key_singers")}: </span>
-                  <span className="text-xs font-medium">{profile.key_singers.join(", ")}</span>
-                </div>
-              )}
-
-              {profile.tags && profile.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1">
-                  {profile.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="text-[10px] px-1.5 py-0.5 rounded bg-accent text-muted-foreground"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
 
               <div className="flex items-start gap-1.5 text-xs p-2 rounded bg-accent/50 italic text-muted-foreground">
                 <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />

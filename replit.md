@@ -40,11 +40,14 @@ build.js                   - Static build script
 
 ### Orchestra Data Flow
 - On app load, `fetchOrchestras()` fetches CSV from configurable Google Sheet URL
-- CSV parsed into Orchestra objects grouped by ID (rows with same ID = multiple profiles)
-- Cached in memory for the session; components read via `getOrchestras()` or `useOrchestras()` hook
-- If fetch fails (offline, bad URL), falls back to hardcoded DEFAULT_ORCHESTRAS in orchestraData.ts
+- CSV parsing: skip rows 1-2, headers on row 3, skip "▸" section headers, "↳" rows are sub-profiles of orchestra above
+- Each CSV row = one orchestra+singer profile with Types column (T/V/M) determining available tanda types
+- IDs generated deterministically from orchestra names via nameToId() (e.g., "Juan D'Arienzo" → "juan_d_arienzo")
+- Profiles grouped into Orchestra objects by ID; components read via `getOrchestras()` or `useOrchestras()` hook
+- If fetch fails (offline, bad URL), falls back to hardcoded DEFAULT_ORCHESTRAS (10 orchestras) in orchestraData.ts
 - Google Sheet URL and Suggest URL are configurable constants in orchestraService.ts
-- Expected CSV columns: id, name, nickname, instrument, active_years, era, era_label, style, energy, mood, danceability, complexity, dj_notes, key_singers (semicolon-separated), tags (semicolon-separated), confidence
+- Key service functions in orchestraService.ts: getOrchestra(), getOrchestras(), calculateEnergy(), calculateEnergyFromProfile(), getOrchestraProfile(), getAllSingers()
+- Profile schema: singer, era, era_label, style, energy, danceability, complexity, mood, types (T/V/M array), dj_notes, key_singers, tags, confidence
 
 ### localStorage Keys
 - `tangoflow_sets` - Array of MilongaSet objects

@@ -1,5 +1,6 @@
 import type { Tanda, MilongaSet } from "@shared/schema";
-import { getOrchestra, getStyleLabel } from "@/lib/orchestraData";
+import { getStyleLabel } from "@/lib/orchestraData";
+import { getOrchestra } from "@/lib/orchestraService";
 import { TANGO_COLORS, STYLE_COLORS } from "@/lib/tangoColors";
 import { useLanguage } from "@/hooks/useLanguage";
 

@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import type { Tanda, TandaType } from "@shared/schema";
-import { getOrchestra, getTTVTTMLabel, getExpectedType } from "@/lib/orchestraData";
+import { getTTVTTMLabel, getExpectedType } from "@/lib/orchestraData";
+import { getOrchestra } from "@/lib/orchestraService";
 import { EnergyBar } from "./EnergyBar";
 import { TypeBadge } from "./TypeBadge";
 import { X, GripVertical, Shuffle } from "lucide-react";

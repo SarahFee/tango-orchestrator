@@ -1,5 +1,6 @@
 import type { Tanda } from "@shared/schema";
-import { getOrchestra, placementGuidelines } from "./orchestraData";
+import { placementGuidelines } from "./orchestraData";
+import { getOrchestra } from "./orchestraService";
 
 export interface Warning {
   id: string;
@@ -87,7 +88,7 @@ export function generateWarnings(tandas: (Tanda | null)[]): Warning[] {
 
   const first3 = tandas.slice(0, 3);
   first3.forEach((t, i) => {
-    if (t && (t.orchestraId === "pugliese" || t.orchestraId === "biagi")) {
+    if (t && (t.orchestraId === "osvaldo_pugliese" || t.orchestraId === "rodolfo_biagi")) {
       const name = getOrchestra(t.orchestraId)?.name || t.orchestraId;
       warnings.push({
         id: `complex-early-${i}`,

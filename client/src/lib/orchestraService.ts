@@ -1,11 +1,11 @@
 import type { Orchestra, OrchestraProfile } from "@shared/schema";
-import { orchestras as DEFAULT_ORCHESTRAS } from "./orchestraData";
+import { DEFAULT_ORCHESTRAS, typeModifiers } from "./orchestraData";
 
 export const GOOGLE_SHEET_CSV_URL =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQExample/pub?gid=0&single=true&output=csv";
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRttN3Dubpp3Q4gCng1DgknWzCZBc-VBUtlfzfRCvLNGtfNgtIyDtuYQF9K9rE3FPIo5v3wflDqGRJ5/pub?gid=1820784714&single=true&output=csv";
 
 export const SUGGEST_ORCHESTRA_URL =
-  "https://docs.google.com/spreadsheets/d/1Example/edit#gid=0";
+  "https://docs.google.com/spreadsheets/d/1yXR2Xayajkt8vuXE0zswcCzz4v95Jk2x2Xf16b1eLMM/edit";
 
 interface OrchestraCache {
   orchestras: Orchestra[];
@@ -44,6 +44,16 @@ export function getOrchestras(): Orchestra[] {
   return cache.orchestras;
 }
 
+export function nameToId(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/['']/g, "")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_|_$/g, "");
+}
+
 function parseCSVRow(row: string): string[] {
   const fields: string[] = [];
   let current = "";
@@ -77,66 +87,108 @@ function parseCSVRow(row: string): string[] {
   return fields;
 }
 
-function parseCSV(text: string): Record<string, string>[] {
-  const lines = text.split(/\r?\n/).filter((l) => l.trim());
-  if (lines.length < 2) return [];
-
-  const headers = parseCSVRow(lines[0]).map((h) => h.toLowerCase().trim());
-  const rows: Record<string, string>[] = [];
-
-  for (let i = 1; i < lines.length; i++) {
-    const values = parseCSVRow(lines[i]);
-    const row: Record<string, string> = {};
-    headers.forEach((h, idx) => {
-      row[h] = values[idx] || "";
-    });
-    rows.push(row);
-  }
-  return rows;
+function parseTypes(typesStr: string): string[] {
+  if (!typesStr) return ["T"];
+  return typesStr
+    .split(/[\s,]+/)
+    .map((t) => t.trim().toUpperCase())
+    .filter((t) => t === "T" || t === "V" || t === "M");
 }
 
-function csvRowsToOrchestras(rows: Record<string, string>[]): Orchestra[] {
-  const map = new Map<string, Orchestra>();
+function parseCSVToOrchestras(text: string): Orchestra[] {
+  const lines = text.split(/\r?\n/);
+  if (lines.length < 4) return [];
 
-  for (const row of rows) {
-    const id = row["id"];
-    if (!id) continue;
+  const headerLine = lines[2];
+  const headers = parseCSVRow(headerLine).map((h) => h.toLowerCase().trim());
 
-    if (!map.has(id)) {
-      map.set(id, {
+  const col = (name: string) => headers.indexOf(name);
+  const iOrch = col("orchestra");
+  const iSinger = col("singer/config");
+  const iEra = col("era");
+  const iStyle = col("style category");
+  const iEnergy = col("energy (1-10)");
+  const iMood = col("mood");
+  const iDance = col("danceability");
+  const iComplex = col("complexity");
+  const iTypes = col("types (t/v/m)");
+  const iNotes = col("dj notes");
+
+  if (iOrch === -1) return [];
+
+  const orchestraMap = new Map<string, Orchestra>();
+  let currentOrchestraName = "";
+
+  for (let i = 3; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line.trim()) continue;
+
+    const values = parseCSVRow(line);
+    const orchCell = (values[iOrch] || "").trim();
+
+    if (orchCell.startsWith("▸") || orchCell.startsWith("▸")) {
+      continue;
+    }
+
+    let orchestraName: string;
+    let singerName: string;
+
+    if (orchCell.startsWith("↳") || orchCell === "↳") {
+      orchestraName = currentOrchestraName;
+      singerName = (values[iSinger] || "").trim();
+    } else if (orchCell === "" && (values[iSinger] || "").trim()) {
+      orchestraName = currentOrchestraName;
+      singerName = (values[iSinger] || "").trim();
+    } else if (orchCell) {
+      orchestraName = orchCell;
+      currentOrchestraName = orchCell;
+      singerName = (values[iSinger] || "").trim();
+    } else {
+      continue;
+    }
+
+    if (!orchestraName) continue;
+
+    const id = nameToId(orchestraName);
+
+    if (!orchestraMap.has(id)) {
+      orchestraMap.set(id, {
         id,
-        name: row["name"] || id,
-        nickname: row["nickname"] || null,
-        instrument: row["instrument"] || undefined,
-        active_years: row["active_years"] || undefined,
+        name: orchestraName,
+        nickname: null,
         profiles: [],
       });
     }
 
-    const orchestra = map.get(id)!;
+    const era = iEra >= 0 ? (values[iEra] || "").trim() : "";
+    const styleRaw = iStyle >= 0 ? (values[iStyle] || "").trim() : "";
+    const style = styleRaw
+      .toLowerCase()
+      .replace(/[\s-]+/g, "_")
+      .replace(/[^a-z0-9_]/g, "");
+    const energy = iEnergy >= 0 ? parseInt(values[iEnergy] || "5") || 5 : 5;
+    const mood = iMood >= 0 ? (values[iMood] || "").trim() : "";
+    const danceability = iDance >= 0 ? parseInt(values[iDance] || "5") || 5 : 5;
+    const complexity = iComplex >= 0 ? parseInt(values[iComplex] || "5") || 5 : 5;
+    const typesStr = iTypes >= 0 ? (values[iTypes] || "").trim() : "T";
+    const djNotes = iNotes >= 0 ? (values[iNotes] || "").trim() : "";
 
     const profile: OrchestraProfile = {
-      era: row["era"] || "Unknown",
-      era_label: row["era_label"] || undefined,
-      style: row["style"] || "smooth",
-      energy: parseInt(row["energy"]) || 5,
-      mood: row["mood"] || "neutral",
-      danceability: parseInt(row["danceability"]) || 5,
-      complexity: parseInt(row["complexity"]) || 5,
-      dj_notes: row["dj_notes"] || "",
-      key_singers: row["key_singers"]
-        ? row["key_singers"].split(";").map((s) => s.trim()).filter(Boolean)
-        : undefined,
-      tags: row["tags"]
-        ? row["tags"].split(";").map((s) => s.trim()).filter(Boolean)
-        : undefined,
-      confidence: row["confidence"] || undefined,
+      singer: singerName || "(instrumental)",
+      era: era || "Unknown",
+      style: style || "smooth",
+      energy: Math.max(1, Math.min(10, energy)),
+      mood: mood || "neutral",
+      danceability: Math.max(1, Math.min(10, danceability)),
+      complexity: Math.max(1, Math.min(10, complexity)),
+      types: parseTypes(typesStr),
+      dj_notes: djNotes,
     };
 
-    orchestra.profiles.push(profile);
+    orchestraMap.get(id)!.profiles.push(profile);
   }
 
-  return Array.from(map.values());
+  return Array.from(orchestraMap.values()).filter((o) => o.profiles.length > 0);
 }
 
 export async function fetchOrchestras(): Promise<void> {
@@ -154,13 +206,7 @@ export async function fetchOrchestras(): Promise<void> {
     }
 
     const text = await response.text();
-    const rows = parseCSV(text);
-
-    if (rows.length === 0) {
-      throw new Error("CSV returned no data rows");
-    }
-
-    const parsed = csvRowsToOrchestras(rows);
+    const parsed = parseCSVToOrchestras(text);
 
     if (parsed.length < 3) {
       throw new Error(`Only ${parsed.length} orchestras parsed — likely bad data`);
@@ -182,4 +228,43 @@ export async function fetchOrchestras(): Promise<void> {
       error: err instanceof Error ? err.message : "Unknown error",
     });
   }
+}
+
+export function getOrchestra(id: string): Orchestra | undefined {
+  return cache.orchestras.find((o) => o.id === id);
+}
+
+export function getOrchestraProfile(id: string, singer?: string): OrchestraProfile | undefined {
+  const orchestra = getOrchestra(id);
+  if (!orchestra) return undefined;
+  if (singer) {
+    return orchestra.profiles.find((p) => p.singer === singer);
+  }
+  return orchestra.profiles[0];
+}
+
+export function calculateEnergy(orchestraId: string, type: string, singer?: string): number {
+  const profile = getOrchestraProfile(orchestraId, singer);
+  if (!profile) return 5;
+  const modifier = typeModifiers[type]?.energy_modifier || 0;
+  return Math.max(1, Math.min(10, profile.energy + modifier));
+}
+
+export function calculateEnergyFromProfile(baseEnergy: number, type: string): number {
+  const modifier = typeModifiers[type]?.energy_modifier || 0;
+  return Math.max(1, Math.min(10, baseEnergy + modifier));
+}
+
+export function getAllSingers(orchestraId: string): string[] {
+  const orchestra = getOrchestra(orchestraId);
+  if (!orchestra) return [];
+  return orchestra.profiles
+    .map((p) => p.singer)
+    .filter((s) => !s.startsWith("("));
+}
+
+export function getAvailableTypes(orchestraId: string, singer?: string): string[] {
+  const profile = getOrchestraProfile(orchestraId, singer);
+  if (!profile) return ["T"];
+  return profile.types;
 }

@@ -11,7 +11,8 @@ import {
 } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import type { MilongaSet, Tanda, TandaType } from "@shared/schema";
-import { getOrchestra, getStyleLabel, calculateEnergy, getAllSingers } from "@/lib/orchestraData";
+import { getStyleLabel } from "@/lib/orchestraData";
+import { getOrchestra } from "@/lib/orchestraService";
 import { generateWarnings } from "@/lib/warnings";
 import { storage } from "@/lib/storage";
 import { EnergyCurve } from "@/components/EnergyCurve";

@@ -1,5 +1,6 @@
 import type { Tanda, TandaType } from "@shared/schema";
-import { getOrchestra, getStyleLabel } from "@/lib/orchestraData";
+import { getStyleLabel } from "@/lib/orchestraData";
+import { getOrchestra } from "@/lib/orchestraService";
 import { EnergyBar } from "./EnergyBar";
 import { TypeBadge } from "./TypeBadge";
 import { GripVertical, X, Shuffle } from "lucide-react";
