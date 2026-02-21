@@ -1,0 +1,414 @@
+# Replit Prompt: TangoFlow — Milonga Set Planner (Phase 1)
+
+```
+Build a web app called "TangoFlow" — a visual milonga set planning tool for Argentine tango DJs. This is Phase 1 ONLY: the Milonga Set Planner. Just the planning tool.
+
+## WHAT THIS APP DOES
+
+A tango DJ plans a 3-4 hour evening ("milonga") by arranging "tandas" (sets of 3-4 songs from the same orchestra/style) into a timeline. Between tandas, short "cortinas" (palette-cleansing clips) signal partner changes. The DJ must:
+- Follow the TTVTTM pattern: Tango-Tango-Vals-Tango-Tango-Milonga, repeating
+- Manage energy — build up, peak, cool down, peak again, wind down
+- Avoid repeating orchestras back-to-back
+- Balance rhythmic, lyrical, dramatic, and smooth styles
+- End with "La Cumparsita" (tradition)
+
+This app is the visual planning layer that no existing tango DJ software provides.
+
+## TECH STACK
+- Frontend: React 18+ with TypeScript
+- Styling: Tailwind CSS (dark theme)
+- State: React Context + Firebase Firestore for persistence
+- Auth: Firebase Authentication (Google sign-in only)
+- Deployment: Static build for GitHub Pages
+- No custom backend server. Everything runs client-side + Firebase.
+
+## DESIGN AESTHETIC
+- Dark theme: deep black (#0f0b09), warm golds (#c9a84c), muted reds (#c94c4c)
+- Typography: Playfair Display for headings, DM Sans for body
+- Feel: elegant, warm, Buenos Aires milonga atmosphere — NOT a generic SaaS dashboard
+- Tango color-coding: Tango = red (#c94c4c), Vals = blue (#4c8ec9), Milonga = green (#4cc96a)
+- Subtle textures, not flat — think candlelit room, not fluorescent office
+
+══════════════════════════════════════════════════════════════
+## ARCHITECTURE: THREE FREE DATA SOURCES, ZERO BACKEND
+══════════════════════════════════════════════════════════════
+
+### 1. ORCHESTRA DATABASE → Google Sheet (read-only, free)
+
+The orchestra database lives in a public Google Sheet. Do NOT hardcode orchestra data.
+
+CSV export URL:
+https://docs.google.com/spreadsheets/d/1yXR2Xayajkt8vuXE0zswcCzz4v95Jk2x2Xf16b1eLMM/export?format=csv&gid=1820784714
+
+On app load:
+1. Fetch this CSV URL
+2. Parse into orchestra profile objects
+3. Cache in memory for the session
+4. If fetch fails (offline, CORS), fall back to a hardcoded minimal dataset of 10 core orchestras embedded in the code
+
+CSV parsing rules:
+- Skip rows 1-2 (title + description)
+- Row 3 = headers
+- Skip section header rows (cells containing "▸" — these are visual labels like "▸ THE BIG FOUR")
+- Handle "↳" prefix in Orchestra column — these belong to the orchestra named in the row above
+
+Columns to parse:
+| CSV Column | App Field | Type | Notes |
+|---|---|---|---|
+| Orchestra | orchestra | string | Group by this. "↳" rows inherit from previous |
+| Singer/Config | singer | string | "(instrumental)" means no singer |
+| Era | era | string | Year range like "1938-1945" |
+| Style Category | style | enum | One of: Harder Rhythmic, Softer Rhythmic, Smooth, Lyrical, Dramatic, Old Guard, Transitional, Modern Dance, Neo Tango |
+| Energy (1-10) | energy | integer | Core value for energy curve |
+| Mood | mood | string | Descriptor for tooltips |
+| Danceability | danceability | integer | 1-10 |
+| Complexity | complexity | integer | 1-10 |
+| Types (T/V/M) | types | string[] | Space-separated. T=tango, V=vals, M=milonga |
+| DJ Notes | djNotes | string | Shown on hover/tooltip |
+| Source | — | — | IGNORE (editorial tracking only) |
+| Your Correction | — | — | IGNORE |
+| Your Notes | — | — | IGNORE |
+
+Building tanda options from profiles:
+Each row generates one or more available tandas based on its Types field:
+- If types includes "T": create tango tanda option (energy = base)
+- If types includes "V": create vals tanda option (energy = base - 1)
+- If types includes "M": create milonga tanda option (energy = base + 1.5)
+- Clamp all energies to 1-10
+
+"Suggest Orchestra" button in the sidebar opens this URL in a new tab:
+https://docs.google.com/spreadsheets/d/1yXR2Xayajkt8vuXE0zswcCzz4v95Jk2x2Xf16b1eLMM/edit
+
+
+### 2. USER MILONGA SETS → Firebase Firestore (read-write, free)
+
+Firebase handles user authentication and set storage. No custom server.
+
+Firebase project setup (user will create and provide config):
+- Firebase Authentication with Google sign-in provider
+- Cloud Firestore database
+
+Firestore collection structure:
+
+```
+sets/{setId}
+  ownerId: string (Firebase user UID)
+  ownerName: string (display name)
+  ownerEmail: string
+  name: string ("Friday Milonga Feb 21")
+  venue: string (optional)
+  date: string (ISO date)
+  startTime: string ("21:00")
+  created: Timestamp
+  updated: Timestamp
+  public: boolean (default false)
+  slots: [
+    {
+      position: number,
+      orchestra: string,
+      singer: string,
+      type: "tango" | "vals" | "milonga",
+      energy: number,
+      style: string,
+      era: string,
+      notes: string (optional per-tanda DJ note)
+    }
+  ]
+  stats: {
+    totalTandas: number,
+    avgEnergy: number,
+    tangoPercent: number,
+    valsPercent: number,
+    milongaPercent: number,
+    uniqueOrchestras: number,
+    estimatedDuration: string
+  }
+```
+
+Firestore security rules:
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /sets/{setId} {
+      // Anyone can read public sets
+      allow read: if resource.data.public == true;
+      // Authenticated users can read their own sets
+      allow read: if request.auth != null && request.auth.uid == resource.data.ownerId;
+      // Authenticated users can create sets
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.ownerId;
+      // Only owner can update/delete
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.ownerId;
+    }
+  }
+}
+```
+
+Auth flow:
+- App shows a "Sign in with Google" button (top-right, next to language toggle)
+- After sign-in: user sees their saved sets, can create new ones
+- Without sign-in: app still works fully using localStorage only (offline mode)
+- Sets saved to both Firebase AND localStorage (localStorage = offline backup)
+- "Browse Community Sets" page shows all sets where public=true
+
+Firebase config — use environment variables:
+```
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_STORAGE_BUCKET=
+VITE_FIREBASE_MESSAGING_SENDER_ID=
+VITE_FIREBASE_APP_ID=
+```
+
+Initialize Firebase in a src/lib/firebase.ts file. Use the modular SDK (v9+):
+```typescript
+import { initializeApp } from 'firebase/app';
+import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+```
+
+
+### 3. LOCAL STORAGE → Offline fallback (always free)
+
+localStorage serves as offline-first backup:
+- Current working set auto-saved to localStorage on every change
+- All user sets cached in localStorage
+- If Firebase is unreachable, app works fully from localStorage
+- When connection resumes, sync localStorage sets to Firebase
+- Language preference stored in localStorage
+- Last-used filters stored in localStorage
+
+
+══════════════════════════════════════════════════════════════
+## PAGES & FEATURES
+══════════════════════════════════════════════════════════════
+
+### Page 1: HOME / MY SETS
+- If signed in: list of saved milonga sets from Firebase, with date, name, venue, tanda count
+- If not signed in: list from localStorage, with prompt to sign in for cloud sync
+- "New Set" button → opens the planner
+- Each set shows a mini energy curve preview (sparkline)
+- "Browse Community Sets" link → shows public sets from other DJs
+- Community sets have a "Duplicate to My Sets" button
+
+### Page 2: SET PLANNER (the core feature)
+This is where DJs spend 95% of their time. Layout:
+
+**Left sidebar: Tanda Library**
+- Shows available tanda "cards" grouped by orchestra
+- Each card shows: Orchestra name, singer, type (tango/vals/milonga), energy score (1-10), style category, era
+- Filter by: type (tango/vals/milonga), style category, energy range (slider), era
+- Search by orchestra name or singer name
+- Cards are color-coded by type: red=tango, blue=vals, green=milonga
+- Energy shown as a colored bar (green→yellow→orange→red from 1→10)
+
+**Creating a tanda card:**
+- User clicks "+" or "Create Tanda" button
+- Selects: orchestra (dropdown with search), singer (auto-populated from DB), type (tango/vals/milonga), number of tracks (3 or 4)
+- Energy auto-calculated from DB but user can override ±1
+- Created tanda appears in the library
+
+**Center: Timeline**
+- Horizontal scrollable timeline with slots
+- Default: 14 slots (typical 3.5-hour milonga)
+- User can add/remove slots
+- Each slot shows: position number, type badge, orchestra name, singer, energy bar
+- Drag & drop tandas from library INTO slots
+- Drag & drop to REORDER within timeline
+- Click slot to edit or remove
+- Between slots, show thin "cortina" dividers
+- Show cumulative time (start time configurable, default 21:00)
+- Empty slots shown as dashed outlines with "Drop tanda here"
+
+**Top: Energy Curve Visualization**
+- Smooth bezier curve drawn across the timeline
+- Y-axis: energy 1-10
+- X-axis: tanda position
+- Points colored by tanda type (red/blue/green)
+- Gradient fill under curve (gold gradient)
+- Shows the "arc" of the evening at a glance
+- Updates in real-time as tandas are added/moved
+
+**Bottom: Smart Warnings Bar**
+- Real-time validation warnings (yellow chips, dismissable):
+  - "⚠ Same orchestra back-to-back (slots 3-4)" 
+  - "⚠ 3 consecutive tangos — add a vals or milonga"
+  - "⚠ No vals in first 8 tandas"
+  - "⚠ Energy jumps from 3 to 9 — consider a transition"
+  - "⚠ Pugliese too early — save for mid-evening"
+- Contextual suggestions (blue chips):
+  - "💡 Consider Di Sarli or Canaro for warm-up"
+  - "💡 La Cumparsita for last slot?"
+
+**Right sidebar: Set Info & Stats**
+- Set name (editable)
+- Venue (optional)
+- Date
+- Start time (editable, default 21:00)
+- Total tandas / estimated duration
+- Average energy
+- Style distribution pie chart (% rhythmic, lyrical, dramatic, smooth)
+- Type distribution (% tango, vals, milonga) — target: ~60% tango, ~20% vals, ~20% milonga
+- Orchestra variety score (how many unique orchestras)
+- Save button → saves to Firebase (if signed in) + localStorage
+- Share button → toggles set public=true, copies shareable URL
+
+**TTVTTM Pattern Helper:**
+- Optional toggle: "Show TTVTTM guide"
+- When on, timeline slots show faded labels: T, T, V, T, T, M, T, T, V, T, T, M, T, T
+- Slots glow yellow if the tanda type doesn't match the pattern
+- This is a GUIDE, not enforcement — DJs can break the pattern
+
+### Page 3: ORCHESTRA REFERENCE
+- Browsable database of all orchestras (from Google Sheet)
+- Each orchestra card shows: name, era range, style, energy, mood, key singers, DJ notes
+- Filter by style, era, energy
+- Clicking an orchestra shows all singer-specific profiles
+- "Quick add tanda" button on each profile
+- "Suggest Orchestra" button → opens Google Sheet in new tab
+
+
+══════════════════════════════════════════════════════════════
+## SMART WARNINGS LOGIC
+══════════════════════════════════════════════════════════════
+
+Rules to implement:
+1. NEVER same orchestra in consecutive tandas (error)
+2. NEVER 3+ consecutive tandas of same type (warning)
+3. WARN if no vals in first 8 slots
+4. WARN if no milonga in first 10 slots
+5. WARN if energy jumps more than 4 points between adjacent tandas
+6. WARN if Pugliese or Biagi is in first 3 slots (too complex for warm-up)
+7. SUGGEST warm-up orchestras (Di Sarli, Canaro, Fresedo, Demare) for first 2 slots if empty
+8. SUGGEST La Cumparsita reminder for last slot
+9. WARN if total tango% < 50% or > 75%
+10. WARN if any single orchestra appears more than 3 times total
+
+
+══════════════════════════════════════════════════════════════
+## ENERGY CALCULATION
+══════════════════════════════════════════════════════════════
+
+When creating a tanda:
+- Base energy comes from orchestra profile (Google Sheet)
+- Type modifier: vals = base - 1, milonga = base + 1.5, tango = base + 0
+- User can adjust ±1 from calculated value
+- Final energy clamped to 1-10
+
+
+══════════════════════════════════════════════════════════════
+## INTERNATIONALIZATION (i18n)
+══════════════════════════════════════════════════════════════
+
+Support 3 languages: English (default), French, Spanish.
+Language toggle (EN | FR | ES) in the top-right header, next to auth button.
+
+Implementation:
+- Create a single src/i18n/translations.ts file with all UI strings as key-value objects:
+
+{
+  en: { 
+    "warm_up": "Warm-up", 
+    "energy": "Energy",
+    "drag_tanda": "Drop a tanda here",
+    "warning_back_to_back": "Same orchestra back-to-back",
+    "sign_in": "Sign in with Google",
+    "my_sets": "My Sets",
+    "community_sets": "Community Sets",
+    "new_set": "New Set",
+    "save": "Save",
+    "share": "Share",
+    "export": "Export",
+    ...
+  },
+  fr: { 
+    "warm_up": "Échauffement", 
+    "energy": "Énergie",
+    "drag_tanda": "Déposez une tanda ici",
+    "warning_back_to_back": "Même orchestre consécutif",
+    "sign_in": "Se connecter avec Google",
+    "my_sets": "Mes Sets",
+    "community_sets": "Sets de la Communauté",
+    "new_set": "Nouveau Set",
+    "save": "Enregistrer",
+    "share": "Partager",
+    "export": "Exporter",
+    ...
+  },
+  es: { 
+    "warm_up": "Calentamiento", 
+    "energy": "Energía",
+    "drag_tanda": "Suelta una tanda aquí",
+    "warning_back_to_back": "Misma orquesta consecutiva",
+    "sign_in": "Iniciar sesión con Google",
+    "my_sets": "Mis Sets",
+    "community_sets": "Sets de la Comunidad",
+    "new_set": "Nuevo Set",
+    "save": "Guardar",
+    "share": "Compartir",
+    "export": "Exportar",
+    ...
+  }
+}
+
+Rules:
+- Store selected language in localStorage
+- Orchestra names, singer names, and tango-specific terms (tanda, cortina, vals, milonga, La Cumparsita) stay in their original language — they are universal in the tango world
+- Only translate: UI labels, warnings, tooltips, buttons, placement guide descriptions
+- The Google Sheet data is NOT translated
+- Approximately 50-60 strings × 3 languages
+
+
+══════════════════════════════════════════════════════════════
+## EXPORT OPTIONS
+══════════════════════════════════════════════════════════════
+
+- Export as text file (formatted list with cortinas marked)
+- Export as JSON (for backup or future integrations)
+- Print-friendly view (single page summary with energy curve)
+- Share link (if set is public, link to /set/{setId})
+
+
+══════════════════════════════════════════════════════════════
+## RESPONSIVE BEHAVIOR
+══════════════════════════════════════════════════════════════
+
+- Desktop: full 3-column layout (library | timeline | stats)
+- Tablet: library collapses to overlay panel, timeline + stats visible
+- Mobile: NOT a priority for Phase 1 (DJs plan on laptops)
+
+
+══════════════════════════════════════════════════════════════
+## SAMPLE DATA
+══════════════════════════════════════════════════════════════
+
+Pre-load 2 example sets so the app doesn't feel empty:
+1. "Classic Saturday Milonga" — 14 tandas, traditional TTVTTM, smooth energy arc
+2. "Short Práctica" — 8 tandas, more experimental, includes one neo-tango tanda
+
+
+══════════════════════════════════════════════════════════════
+## DEPLOYMENT
+══════════════════════════════════════════════════════════════
+
+This is a static client-side app. The build output must be:
+- Static HTML/CSS/JS files deployable to GitHub Pages
+- All Firebase communication happens client-side (no server functions)
+- Environment variables handled via Vite's VITE_ prefix
+- Include a proper .env.example file documenting all required vars
+- Build command: npm run build → outputs to dist/
+
+
+══════════════════════════════════════════════════════════════
+## WHAT IS EXPLICITLY NOT IN PHASE 1
+══════════════════════════════════════════════════════════════
+
+- No music playback or audio
+- No Spotify/Apple Music integration
+- No AI-generated suggestions (just rule-based warnings)
+- No real-time collaboration (just share via public link)
+- No mobile app
+- No music file management
+- No payment or premium features
+```

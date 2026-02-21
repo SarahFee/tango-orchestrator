@@ -2,7 +2,7 @@ import type { Orchestra, OrchestraProfile } from "@shared/schema";
 import { DEFAULT_ORCHESTRAS, typeModifiers } from "./orchestraData";
 
 export const GOOGLE_SHEET_CSV_URL =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRttN3Dubpp3Q4gCng1DgknWzCZBc-VBUtlfzfRCvLNGtfNgtIyDtuYQF9K9rE3FPIo5v3wflDqGRJ5/pub?gid=1820784714&single=true&output=csv";
+  "https://docs.google.com/spreadsheets/d/1yXR2Xayajkt8vuXE0zswcCzz4v95Jk2x2Xf16b1eLMM/export?format=csv&gid=1820784714";
 
 export const SUGGEST_ORCHESTRA_URL =
   "https://docs.google.com/spreadsheets/d/1yXR2Xayajkt8vuXE0zswcCzz4v95Jk2x2Xf16b1eLMM/edit";
