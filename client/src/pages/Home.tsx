@@ -140,6 +140,50 @@ export default function Home() {
   );
 }
 
+function EnergySparkline({ tandas }: { tandas: Tanda[] }) {
+  const sorted = tandas
+    .filter((t) => t.position !== null)
+    .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+
+  if (sorted.length < 2) return null;
+
+  const w = 120;
+  const h = 28;
+  const pad = 2;
+  const chartW = w - pad * 2;
+  const chartH = h - pad * 2;
+  const maxIdx = sorted.length - 1;
+
+  const points = sorted.map((t, i) => ({
+    x: pad + (i / maxIdx) * chartW,
+    y: pad + chartH - ((t.energy - 1) / 9) * chartH,
+  }));
+
+  let d = `M ${points[0].x} ${points[0].y}`;
+  for (let i = 1; i < points.length; i++) {
+    const prev = points[i - 1];
+    const curr = points[i];
+    const cpx1 = prev.x + (curr.x - prev.x) * 0.4;
+    const cpx2 = prev.x + (curr.x - prev.x) * 0.6;
+    d += ` C ${cpx1} ${prev.y}, ${cpx2} ${curr.y}, ${curr.x} ${curr.y}`;
+  }
+
+  const fillD = d + ` L ${points[points.length - 1].x} ${h - pad} L ${points[0].x} ${h - pad} Z`;
+
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-7" preserveAspectRatio="xMidYMid meet" data-testid="sparkline">
+      <defs>
+        <linearGradient id={`spark-fill`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#c9a84c" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="#c9a84c" stopOpacity="0.05" />
+        </linearGradient>
+      </defs>
+      <path d={fillD} fill="url(#spark-fill)" />
+      <path d={d} fill="none" stroke="#c9a84c" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function SetCard({ set, onClick, onDelete }: { set: MilongaSet; onClick: () => void; onDelete: (e: React.MouseEvent) => void }) {
   const { t } = useLanguage();
   const tandas = storage.getTandasForSet(set.id);
@@ -177,6 +221,12 @@ function SetCard({ set, onClick, onDelete }: { set: MilongaSet; onClick: () => v
           <span>{t("starts")} {set.startTime}</span>
         </div>
       </div>
+
+      {filledTandas.length >= 2 && (
+        <div className="mb-3">
+          <EnergySparkline tandas={tandas} />
+        </div>
+      )}
 
       <div className="flex items-center gap-4 text-xs border-t border-border/30 pt-3">
         <div>

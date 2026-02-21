@@ -39,6 +39,7 @@ import {
   FileJson,
   Download,
   Upload,
+  Printer,
 } from "lucide-react";
 
 const DEFAULT_SLOTS = 14;
@@ -240,6 +241,86 @@ export default function SetPlanner() {
     URL.revokeObjectURL(url);
   };
 
+  const handlePrint = () => {
+    if (!set) return;
+    const typeLabel = (tp: string) => tp === "tango" ? "T" : tp === "vals" ? "V" : "M";
+    const typeColor = (tp: string) => tp === "tango" ? "#c94c4c" : tp === "vals" ? "#4c8ec9" : "#4cc96a";
+
+    const rows = timelineTandas
+      .map((td, i) => {
+        if (!td) return `<tr class="empty"><td>${i + 1}</td><td colspan="5" style="color:#666;font-style:italic">${t("export_empty_slot")}</td></tr>`;
+        const isMixed = td.tandaMode === "mixed";
+        let orchName: string;
+        if (isMixed && td.orchestraIds && td.orchestraIds.length > 0) {
+          orchName = td.orchestraIds.map((id) => getOrchestra(id)?.name || id).join(" / ");
+        } else {
+          orchName = getOrchestra(td.orchestraId)?.name || td.orchestraId;
+        }
+        return `<tr>
+          <td>${i + 1}</td>
+          <td><span class="type-badge" style="background:${typeColor(td.type)}">${typeLabel(td.type)}${isMixed ? " MIX" : ""}</span></td>
+          <td><strong>${orchName}</strong>${td.singer ? ` <span style="color:#888">(${td.singer})</span>` : ""}</td>
+          <td class="num">${td.energy.toFixed(1)}</td>
+          <td class="num">${td.trackCount}</td>
+          <td style="color:#888;font-size:11px">${td.style ? getStyleLabel(td.style) : ""}</td>
+        </tr>`;
+      })
+      .join("\n");
+
+    const svgW = 600;
+    const svgH = 100;
+    const filledPts = timelineTandas
+      .map((td, i) => td ? { i, e: td.energy, type: td.type } : null)
+      .filter(Boolean) as { i: number; e: number; type: string }[];
+
+    let sparkSvg = "";
+    if (filledPts.length >= 2) {
+      const xScale = (idx: number) => 20 + (idx / Math.max(timelineTandas.length - 1, 1)) * (svgW - 40);
+      const yScale = (e: number) => 10 + (svgH - 20) - ((e - 1) / 9) * (svgH - 20);
+      const pts = filledPts.map((p) => ({ x: xScale(p.i), y: yScale(p.e), type: p.type }));
+      let d = `M ${pts[0].x} ${pts[0].y}`;
+      for (let i = 1; i < pts.length; i++) {
+        const prev = pts[i - 1];
+        const curr = pts[i];
+        d += ` C ${prev.x + (curr.x - prev.x) * 0.4} ${prev.y}, ${prev.x + (curr.x - prev.x) * 0.6} ${curr.y}, ${curr.x} ${curr.y}`;
+      }
+      const fillD = d + ` L ${pts[pts.length - 1].x} ${svgH - 10} L ${pts[0].x} ${svgH - 10} Z`;
+      const dots = pts.map((p) => `<circle cx="${p.x}" cy="${p.y}" r="4" fill="${typeColor(p.type)}" stroke="white" stroke-width="1"/>`).join("");
+      sparkSvg = `<svg viewBox="0 0 ${svgW} ${svgH}" style="width:100%;height:100px;margin:16px 0">
+        <path d="${fillD}" fill="rgba(201,168,76,0.15)"/>
+        <path d="${d}" fill="none" stroke="#c9a84c" stroke-width="2"/>
+        ${dots}
+      </svg>`;
+    }
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${set.name}</title>
+    <style>
+      body{font-family:-apple-system,sans-serif;max-width:800px;margin:0 auto;padding:24px;color:#222}
+      h1{font-family:Georgia,serif;margin:0 0 4px}
+      .meta{color:#666;font-size:13px;margin-bottom:16px}
+      table{width:100%;border-collapse:collapse;font-size:13px}
+      th{text-align:left;border-bottom:2px solid #222;padding:6px 8px;font-size:11px;text-transform:uppercase;color:#666}
+      td{padding:5px 8px;border-bottom:1px solid #eee}
+      .num{text-align:center;font-variant-numeric:tabular-nums}
+      .type-badge{display:inline-block;padding:1px 6px;border-radius:3px;color:white;font-size:11px;font-weight:600}
+      tr.empty td{background:#fafafa}
+      @media print{body{padding:0}table{page-break-inside:auto}tr{page-break-inside:avoid}}
+    </style></head><body>
+    <h1>${set.name}</h1>
+    <div class="meta">${set.date}${set.venue ? ` — ${set.venue}` : ""} — ${t("start_time")}: ${set.startTime}</div>
+    ${sparkSvg}
+    <table><thead><tr><th>#</th><th>${t("type")}</th><th>${t("orchestra")}</th><th>${t("energy")}</th><th>${t("tracks")}</th><th>${t("style_distribution")}</th></tr></thead>
+    <tbody>${rows}</tbody></table>
+    <script>window.print();</script>
+    </body></html>`;
+
+    const printWindow = window.open("", "_blank");
+    if (printWindow) {
+      printWindow.document.write(html);
+      printWindow.document.close();
+    }
+  };
+
   const handleImportSet = () => {
     const input = document.createElement("input");
     input.type = "file";
@@ -394,6 +475,9 @@ export default function SetPlanner() {
               </Button>
               <Button variant="ghost" size="icon" onClick={handleExportJSON} title={t("export_json")} data-testid="button-export-json">
                 <FileJson className="w-4 h-4" />
+              </Button>
+              <Button variant="ghost" size="icon" onClick={handlePrint} title={t("print")} data-testid="button-print">
+                <Printer className="w-4 h-4" />
               </Button>
             </div>
           </div>
