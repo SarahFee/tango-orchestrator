@@ -25,6 +25,7 @@ export interface Tanda {
 }
 
 export interface OrchestraProfile {
+  singer: string;
   era: string;
   era_label?: string;
   style: string;
@@ -32,8 +33,9 @@ export interface OrchestraProfile {
   mood: string;
   danceability: number;
   complexity: number;
-  tags?: string[];
+  types: string[];
   dj_notes: string;
+  tags?: string[];
   key_singers?: string[];
   singer_effects?: Record<string, string>;
   confidence?: string;
