@@ -1,5 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState, useMemo, useCallback } from "react";
 import { useParams, useLocation } from "wouter";
 import {
   DndContext,
@@ -12,9 +11,9 @@ import {
 } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import type { MilongaSet, Tanda, TandaType } from "@shared/schema";
-import { apiRequest, queryClient } from "@/lib/queryClient";
 import { orchestras, getOrchestra, getStyleLabel, calculateEnergy, getAllSingers } from "@/lib/orchestraData";
 import { generateWarnings } from "@/lib/warnings";
+import { storage } from "@/lib/storage";
 import { EnergyCurve } from "@/components/EnergyCurve";
 import { TandaCard } from "@/components/TandaCard";
 import { TimelineSlot } from "@/components/TimelineSlot";
@@ -27,20 +26,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 import {
   ArrowLeft,
   Plus,
   Minus,
   Search,
-  Download,
-  ToggleLeft,
   FileText,
   FileJson,
-  Printer,
+  Download,
+  Upload,
 } from "lucide-react";
 
 const DEFAULT_SLOTS = 14;
@@ -48,27 +44,28 @@ const DEFAULT_SLOTS = 14;
 export default function SetPlanner() {
   const params = useParams<{ id: string }>();
   const [, navigate] = useLocation();
+  const { toast } = useToast();
   const setId = params.id;
 
+  const [set, setSet] = useState<MilongaSet | undefined>(() => storage.getSet(setId));
+  const [allTandas, setAllTandas] = useState<Tanda[]>(() => storage.getTandasForSet(setId));
   const [slotCount, setSlotCount] = useState(DEFAULT_SLOTS);
   const [showPattern, setShowPattern] = useState(true);
   const [librarySearch, setLibrarySearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
-  const [styleFilter, setStyleFilter] = useState("all");
-  const [energyRange, setEnergyRange] = useState([1, 10]);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
 
-  const { data: set, isLoading: setLoading } = useQuery<MilongaSet>({
-    queryKey: ["/api/sets", setId],
-  });
+  const refreshTandas = useCallback(() => {
+    setAllTandas(storage.getTandasForSet(setId));
+  }, [setId]);
 
-  const { data: allTandas = [], isLoading: tandasLoading } = useQuery<Tanda[]>({
-    queryKey: ["/api/sets", setId, "tandas"],
-  });
+  const refreshSet = useCallback(() => {
+    setSet(storage.getSet(setId));
+  }, [setId]);
 
   const libraryTandas = useMemo(
     () => allTandas.filter((t) => t.position === null || t.position === undefined),
@@ -95,11 +92,9 @@ export default function SetPlanner() {
         orchestra?.name.toLowerCase().includes(librarySearch.toLowerCase()) ||
         t.singer?.toLowerCase().includes(librarySearch.toLowerCase());
       const matchType = typeFilter === "all" || t.type === typeFilter;
-      const matchStyle = styleFilter === "all" || t.style === styleFilter;
-      const matchEnergy = t.energy >= energyRange[0] && t.energy <= energyRange[1];
-      return matchSearch && matchType && matchStyle && matchEnergy;
+      return matchSearch && matchType;
     });
-  }, [libraryTandas, librarySearch, typeFilter, styleFilter, energyRange]);
+  }, [libraryTandas, librarySearch, typeFilter]);
 
   const warnings = useMemo(() => generateWarnings(timelineTandas), [timelineTandas]);
   const warningSlots = useMemo(
@@ -122,57 +117,40 @@ export default function SetPlanner() {
     return mins;
   }, [timelineTandas, slotCount]);
 
-  const updateSetMutation = useMutation({
-    mutationFn: (updates: Partial<MilongaSet>) =>
-      apiRequest("PATCH", `/api/sets/${setId}`, updates),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/sets", setId] });
-      queryClient.invalidateQueries({ queryKey: ["/api/sets"] });
+  const handleUpdateSet = useCallback(
+    (updates: Partial<MilongaSet>) => {
+      storage.updateSet(setId, updates);
+      refreshSet();
     },
-  });
-
-  const createTandaMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("POST", `/api/sets/${setId}/tandas`, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/sets", setId, "tandas"] });
-    },
-  });
-
-  const updateTandaMutation = useMutation({
-    mutationFn: ({ tandaId, updates }: { tandaId: string; updates: any }) =>
-      apiRequest("PATCH", `/api/tandas/${tandaId}`, updates),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/sets", setId, "tandas"] });
-    },
-  });
-
-  const deleteTandaMutation = useMutation({
-    mutationFn: (tandaId: string) => apiRequest("DELETE", `/api/tandas/${tandaId}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/sets", setId, "tandas"] });
-    },
-  });
+    [setId, refreshSet]
+  );
 
   const handleCreateTanda = useCallback(
     (data: any) => {
-      createTandaMutation.mutate({ ...data, setId, position: null });
+      storage.createTanda({ ...data, setId, position: null });
+      refreshTandas();
     },
-    [setId]
+    [setId, refreshTandas]
   );
 
   const handleRemoveFromTimeline = useCallback(
     (index: number) => {
       const tanda = timelineTandas[index];
       if (tanda) {
-        updateTandaMutation.mutate({ tandaId: tanda.id, updates: { position: null } });
+        storage.updateTanda(tanda.id, { position: null });
+        refreshTandas();
       }
     },
-    [timelineTandas]
+    [timelineTandas, refreshTandas]
   );
 
-  const handleDeleteTanda = useCallback((tandaId: string) => {
-    deleteTandaMutation.mutate(tandaId);
-  }, []);
+  const handleDeleteTanda = useCallback(
+    (tandaId: string) => {
+      storage.deleteTanda(tandaId);
+      refreshTandas();
+    },
+    [refreshTandas]
+  );
 
   const handleDragStart = (event: any) => {
     setActiveDragId(event.active.id);
@@ -189,10 +167,8 @@ export default function SetPlanner() {
     if (activeData?.type === "library-tanda" && overData?.type === "slot") {
       const slotIndex = overData.index;
       if (!timelineTandas[slotIndex]) {
-        updateTandaMutation.mutate({
-          tandaId: activeData.tanda.id,
-          updates: { position: slotIndex },
-        });
+        storage.updateTanda(activeData.tanda.id, { position: slotIndex });
+        refreshTandas();
       }
     }
 
@@ -204,11 +180,12 @@ export default function SetPlanner() {
         const toTanda = timelineTandas[toIndex];
         if (fromTanda) {
           if (toTanda) {
-            updateTandaMutation.mutate({ tandaId: fromTanda.id, updates: { position: toIndex } });
-            updateTandaMutation.mutate({ tandaId: toTanda.id, updates: { position: fromIndex } });
+            storage.updateTanda(fromTanda.id, { position: toIndex });
+            storage.updateTanda(toTanda.id, { position: fromIndex });
           } else {
-            updateTandaMutation.mutate({ tandaId: fromTanda.id, updates: { position: toIndex } });
+            storage.updateTanda(fromTanda.id, { position: toIndex });
           }
+          refreshTandas();
         }
       }
     }
@@ -243,23 +220,8 @@ export default function SetPlanner() {
 
   const handleExportJSON = () => {
     if (!set) return;
-    const data = {
-      set: { name: set.name, venue: set.venue, date: set.date, startTime: set.startTime },
-      tandas: timelineTandas.map((t, i) => {
-        if (!t) return { position: i + 1, empty: true };
-        return {
-          position: i + 1,
-          orchestra: getOrchestra(t.orchestraId)?.name,
-          orchestraId: t.orchestraId,
-          singer: t.singer,
-          type: t.type,
-          energy: t.energy,
-          trackCount: t.trackCount,
-          style: t.style,
-          era: t.era,
-        };
-      }),
-    };
+    const data = storage.exportSet(setId);
+    if (!data) return;
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -269,34 +231,38 @@ export default function SetPlanner() {
     URL.revokeObjectURL(url);
   };
 
+  const handleImportSet = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const data = JSON.parse(ev.target?.result as string);
+          if (data.set && data.tandas) {
+            const imported = storage.importSet(data);
+            toast({ title: "Set imported", description: `"${imported.name}" added.` });
+            navigate(`/planner/${imported.id}`);
+          } else {
+            throw new Error("Invalid format");
+          }
+        } catch {
+          toast({ title: "Import failed", description: "Invalid set file.", variant: "destructive" });
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  };
+
   const activeTanda = useMemo(() => {
     if (!activeDragId) return null;
     const id = activeDragId.toString().replace("library-", "").replace("timeline-", "");
     return allTandas.find((t) => t.id === id) || null;
   }, [activeDragId, allTandas]);
-
-  if (setLoading || tandasLoading) {
-    return (
-      <div className="flex h-full">
-        <div className="w-64 border-r border-border/30 p-4">
-          <Skeleton className="h-8 mb-4" />
-          <Skeleton className="h-20 mb-2" />
-          <Skeleton className="h-20 mb-2" />
-          <Skeleton className="h-20" />
-        </div>
-        <div className="flex-1 p-4">
-          <Skeleton className="h-32 mb-4" />
-          <Skeleton className="h-20 mb-2" />
-          <Skeleton className="h-20 mb-2" />
-          <Skeleton className="h-20" />
-        </div>
-        <div className="w-64 border-l border-border/30 p-4">
-          <Skeleton className="h-8 mb-4" />
-          <Skeleton className="h-40" />
-        </div>
-      </div>
-    );
-  }
 
   if (!set) {
     return (
@@ -414,10 +380,13 @@ export default function SetPlanner() {
                   <Plus className="w-3 h-3" />
                 </Button>
               </div>
-              <Button variant="ghost" size="icon" onClick={handleExportText} data-testid="button-export-text">
+              <Button variant="ghost" size="icon" onClick={handleImportSet} title="Import set" data-testid="button-import-set">
+                <Upload className="w-4 h-4" />
+              </Button>
+              <Button variant="ghost" size="icon" onClick={handleExportText} title="Export as text" data-testid="button-export-text">
                 <FileText className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="icon" onClick={handleExportJSON} data-testid="button-export-json">
+              <Button variant="ghost" size="icon" onClick={handleExportJSON} title="Export as JSON" data-testid="button-export-json">
                 <FileJson className="w-4 h-4" />
               </Button>
             </div>
@@ -467,7 +436,7 @@ export default function SetPlanner() {
             <SetStats
               set={set}
               tandas={timelineTandas}
-              onUpdateSet={(updates) => updateSetMutation.mutate(updates)}
+              onUpdateSet={handleUpdateSet}
             />
           </ScrollArea>
         </div>

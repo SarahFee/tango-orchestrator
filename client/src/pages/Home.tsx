@@ -1,31 +1,86 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState, useCallback, useEffect } from "react";
 import { useLocation } from "wouter";
 import type { MilongaSet, Tanda } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Plus, Calendar, MapPin, Music, ChevronRight, Clock } from "lucide-react";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { getOrchestra } from "@/lib/orchestraData";
+import { Plus, Calendar, MapPin, Music, ChevronRight, Clock, Upload, Download } from "lucide-react";
+import { storage } from "@/lib/storage";
 import { EnergyBar } from "@/components/EnergyBar";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Home() {
   const [, navigate] = useLocation();
+  const { toast } = useToast();
+  const [sets, setSets] = useState<MilongaSet[]>(() => storage.getAllSets());
+  const [, setTick] = useState(0);
 
-  const { data: sets, isLoading } = useQuery<MilongaSet[]>({
-    queryKey: ["/api/sets"],
-  });
+  const refresh = useCallback(() => {
+    setSets(storage.getAllSets());
+    setTick((t) => t + 1);
+  }, []);
 
-  const handleNewSet = async () => {
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  const handleNewSet = () => {
     const today = new Date().toISOString().split("T")[0];
-    const res = await apiRequest("POST", "/api/sets", {
+    const newSet = storage.createSet({
       name: "New Milonga Set",
       date: today,
       startTime: "21:00",
+      venue: null,
     });
-    const newSet = await res.json();
-    queryClient.invalidateQueries({ queryKey: ["/api/sets"] });
+    refresh();
     navigate(`/planner/${newSet.id}`);
+  };
+
+  const handleDeleteSet = (e: React.MouseEvent, setId: string) => {
+    e.stopPropagation();
+    storage.deleteSet(setId);
+    refresh();
+  };
+
+  const handleExportAll = () => {
+    const data = storage.exportAllData();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `tangoflow_backup_${new Date().toISOString().split("T")[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Backup exported", description: "Your complete library has been saved." });
+  };
+
+  const handleImportAll = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const data = JSON.parse(ev.target?.result as string);
+          if (data.set && data.tandas) {
+            storage.importSet(data);
+            toast({ title: "Set imported", description: `"${data.set.name}" has been added to your library.` });
+          } else if (data.sets && data.tandas) {
+            storage.importAllData(data);
+            toast({ title: "Backup restored", description: `${data.sets.length} sets have been restored.` });
+          } else {
+            throw new Error("Unrecognized format");
+          }
+          refresh();
+        } catch {
+          toast({ title: "Import failed", description: "The file doesn't appear to be a valid TangoFlow backup.", variant: "destructive" });
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
   };
 
   return (
@@ -39,27 +94,29 @@ export default function Home() {
             Plan your milonga evenings with precision and soul
           </p>
         </div>
-        <Button onClick={handleNewSet} data-testid="button-new-set">
-          <Plus className="w-4 h-4 mr-1.5" />
-          New Set
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={handleImportAll} title="Import backup" data-testid="button-import">
+            <Upload className="w-4 h-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={handleExportAll} title="Export backup" data-testid="button-export-all">
+            <Download className="w-4 h-4" />
+          </Button>
+          <Button onClick={handleNewSet} data-testid="button-new-set">
+            <Plus className="w-4 h-4 mr-1.5" />
+            New Set
+          </Button>
+        </div>
       </div>
 
-      {isLoading ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3].map((i) => (
-            <Card key={i} className="p-4">
-              <Skeleton className="h-5 w-3/4 mb-3" />
-              <Skeleton className="h-3 w-1/2 mb-2" />
-              <Skeleton className="h-3 w-1/3 mb-4" />
-              <Skeleton className="h-8 w-full" />
-            </Card>
-          ))}
-        </div>
-      ) : sets && sets.length > 0 ? (
+      {sets.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {sets.map((set) => (
-            <SetCard key={set.id} set={set} onClick={() => navigate(`/planner/${set.id}`)} />
+            <SetCard
+              key={set.id}
+              set={set}
+              onClick={() => navigate(`/planner/${set.id}`)}
+              onDelete={(e) => handleDeleteSet(e, set.id)}
+            />
           ))}
         </div>
       ) : (
@@ -81,12 +138,9 @@ export default function Home() {
   );
 }
 
-function SetCard({ set, onClick }: { set: MilongaSet; onClick: () => void }) {
-  const { data: tandas } = useQuery<Tanda[]>({
-    queryKey: ["/api/sets", set.id, "tandas"],
-  });
-
-  const filledTandas = tandas?.filter((t) => t.position !== null) || [];
+function SetCard({ set, onClick, onDelete }: { set: MilongaSet; onClick: () => void; onDelete: (e: React.MouseEvent) => void }) {
+  const tandas = storage.getTandasForSet(set.id);
+  const filledTandas = tandas.filter((t) => t.position !== null);
   const avgEnergy =
     filledTandas.length > 0
       ? filledTandas.reduce((sum, t) => sum + t.energy, 0) / filledTandas.length
