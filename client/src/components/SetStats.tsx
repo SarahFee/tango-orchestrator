@@ -45,6 +45,7 @@ export function SetStats({ set, tandas, onUpdateSet }: SetStatsProps) {
           value={set.name}
           onChange={(e) => onUpdateSet?.({ name: e.target.value })}
           className="w-full bg-transparent border-b border-border/30 focus:border-primary/50 outline-none font-serif text-sm py-1 transition-colors"
+          autoComplete="off"
           data-testid="input-set-name"
         />
       </div>
@@ -56,6 +57,7 @@ export function SetStats({ set, tandas, onUpdateSet }: SetStatsProps) {
           onChange={(e) => onUpdateSet?.({ venue: e.target.value })}
           placeholder={t("optional")}
           className="w-full bg-transparent border-b border-border/30 focus:border-primary/50 outline-none text-sm py-1 transition-colors"
+          autoComplete="off"
           data-testid="input-venue"
         />
       </div>

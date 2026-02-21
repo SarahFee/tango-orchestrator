@@ -115,7 +115,7 @@ function App() {
       <TooltipProvider>
         <div className="flex flex-col h-screen">
           <NavBar />
-          <main className="flex-1 overflow-hidden">
+          <main className="flex-1 overflow-y-auto">
             <Router />
           </main>
         </div>
