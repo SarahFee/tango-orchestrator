@@ -1,38 +1,76 @@
-import { type User, type InsertUser } from "@shared/schema";
-import { randomUUID } from "crypto";
-
-// modify the interface with any CRUD methods
-// you might need
+import {
+  type MilongaSet,
+  type InsertMilongaSet,
+  type Tanda,
+  type InsertTanda,
+  milongaSets,
+  tandas,
+} from "@shared/schema";
+import { db } from "./db";
+import { eq, and } from "drizzle-orm";
 
 export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  getAllSets(): Promise<MilongaSet[]>;
+  getSet(id: string): Promise<MilongaSet | undefined>;
+  createSet(data: InsertMilongaSet): Promise<MilongaSet>;
+  updateSet(id: string, data: Partial<InsertMilongaSet>): Promise<MilongaSet | undefined>;
+  deleteSet(id: string): Promise<void>;
+  getTandasForSet(setId: string): Promise<Tanda[]>;
+  createTanda(data: InsertTanda): Promise<Tanda>;
+  updateTanda(id: string, data: Partial<InsertTanda>): Promise<Tanda | undefined>;
+  deleteTanda(id: string): Promise<void>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-
-  constructor() {
-    this.users = new Map();
+export class DatabaseStorage implements IStorage {
+  async getAllSets(): Promise<MilongaSet[]> {
+    return db.select().from(milongaSets).orderBy(milongaSets.createdAt);
   }
 
-  async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+  async getSet(id: string): Promise<MilongaSet | undefined> {
+    const [set] = await db.select().from(milongaSets).where(eq(milongaSets.id, id));
+    return set;
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+  async createSet(data: InsertMilongaSet): Promise<MilongaSet> {
+    const [set] = await db.insert(milongaSets).values(data).returning();
+    return set;
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
+  async updateSet(id: string, data: Partial<InsertMilongaSet>): Promise<MilongaSet | undefined> {
+    const [set] = await db
+      .update(milongaSets)
+      .set(data)
+      .where(eq(milongaSets.id, id))
+      .returning();
+    return set;
+  }
+
+  async deleteSet(id: string): Promise<void> {
+    await db.delete(tandas).where(eq(tandas.setId, id));
+    await db.delete(milongaSets).where(eq(milongaSets.id, id));
+  }
+
+  async getTandasForSet(setId: string): Promise<Tanda[]> {
+    return db.select().from(tandas).where(eq(tandas.setId, setId));
+  }
+
+  async createTanda(data: InsertTanda): Promise<Tanda> {
+    const [tanda] = await db.insert(tandas).values(data).returning();
+    return tanda;
+  }
+
+  async updateTanda(id: string, data: Partial<InsertTanda>): Promise<Tanda | undefined> {
+    const [tanda] = await db
+      .update(tandas)
+      .set(data)
+      .where(eq(tandas.id, id))
+      .returning();
+    return tanda;
+  }
+
+  async deleteTanda(id: string): Promise<void> {
+    await db.delete(tandas).where(eq(tandas.id, id));
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
