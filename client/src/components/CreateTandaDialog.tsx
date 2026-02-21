@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { orchestras, calculateEnergy, getAllSingers, getStyleLabel } from "@/lib/orchestraData";
+import { calculateEnergy, getAllSingers, getStyleLabel } from "@/lib/orchestraData";
+import { getOrchestras } from "@/lib/orchestraService";
 import { Plus } from "lucide-react";
 import { TypeBadge } from "./TypeBadge";
 import { EnergyBar } from "./EnergyBar";
@@ -33,7 +34,8 @@ export function CreateTandaDialog({ onCreateTanda, trigger }: CreateTandaDialogP
   const [energyOverride, setEnergyOverride] = useState<number | null>(null);
   const [search, setSearch] = useState("");
 
-  const selectedOrchestra = useMemo(() => orchestras.find((o) => o.id === orchestraId), [orchestraId]);
+  const orchestras = getOrchestras();
+  const selectedOrchestra = useMemo(() => orchestras.find((o) => o.id === orchestraId), [orchestras, orchestraId]);
   const singers = useMemo(() => (orchestraId ? getAllSingers(orchestraId) : []), [orchestraId]);
   const calculatedEnergy = useMemo(
     () => (orchestraId ? calculateEnergy(orchestraId, type) : 5),
@@ -47,7 +49,7 @@ export function CreateTandaDialog({ onCreateTanda, trigger }: CreateTandaDialogP
     return orchestras.filter(
       (o) => o.name.toLowerCase().includes(s) || o.nickname?.toLowerCase().includes(s)
     );
-  }, [search]);
+  }, [orchestras, search]);
 
   const handleSubmit = () => {
     if (!orchestraId) return;

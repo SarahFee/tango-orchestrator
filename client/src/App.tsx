@@ -8,6 +8,7 @@ import OrchestraReference from "@/pages/OrchestraReference";
 import { useEffect } from "react";
 import { Music, Library, BookOpen } from "lucide-react";
 import { storage } from "@/lib/storage";
+import { fetchOrchestras } from "@/lib/orchestraService";
 
 function Router() {
   return (
@@ -75,6 +76,7 @@ function App() {
   useEffect(() => {
     document.documentElement.classList.add("dark");
     storage.seedIfEmpty();
+    fetchOrchestras();
   }, []);
 
   return (

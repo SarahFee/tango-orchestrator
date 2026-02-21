@@ -1,16 +1,20 @@
 import { useState, useMemo } from "react";
-import { orchestras, getStyleLabel, styleCategories } from "@/lib/orchestraData";
-import { STYLE_COLORS, getEnergyColor } from "@/lib/tangoColors";
+import { getStyleLabel, styleCategories } from "@/lib/orchestraData";
+import { STYLE_COLORS } from "@/lib/tangoColors";
 import { EnergyBar } from "@/components/EnergyBar";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Search, Music, Info, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, Music, Info, ChevronDown, ChevronUp, RefreshCw, ExternalLink, Loader2, Cloud, HardDrive } from "lucide-react";
 import type { Orchestra } from "@shared/schema";
+import { useOrchestras } from "@/hooks/useOrchestras";
+import { SUGGEST_ORCHESTRA_URL } from "@/lib/orchestraService";
 
 export default function OrchestraReference() {
+  const { orchestras, loading, lastSynced, source, error, refresh } = useOrchestras();
   const [search, setSearch] = useState("");
   const [styleFilter, setStyleFilter] = useState("all");
   const [energyRange, setEnergyRange] = useState([1, 10]);
@@ -32,17 +36,62 @@ export default function OrchestraReference() {
 
       return matchesSearch && matchesStyle && matchesEnergy;
     });
-  }, [search, styleFilter, energyRange]);
+  }, [orchestras, search, styleFilter, energyRange]);
 
   return (
     <div className="min-h-full p-6 md:p-8 max-w-5xl mx-auto">
       <div className="mb-8">
-        <h1 className="font-serif text-3xl md:text-4xl font-bold tracking-tight" data-testid="text-orchestra-title">
-          Orchestra Reference
-        </h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Browse the golden age and beyond — {orchestras.length} orchestras
-        </p>
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="font-serif text-3xl md:text-4xl font-bold tracking-tight" data-testid="text-orchestra-title">
+              Orchestra Reference
+            </h1>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Browse the golden age and beyond — {orchestras.length} orchestras
+            </p>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.open(SUGGEST_ORCHESTRA_URL, "_blank")}
+              data-testid="button-suggest-orchestra"
+            >
+              <ExternalLink className="w-3.5 h-3.5 mr-1.5" />
+              Suggest Orchestra
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={refresh}
+              disabled={loading}
+              data-testid="button-refresh-orchestras"
+            >
+              {loading ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <RefreshCw className="w-3.5 h-3.5" />
+              )}
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground" data-testid="sync-status">
+          {source === "remote" ? (
+            <Cloud className="w-3 h-3" />
+          ) : (
+            <HardDrive className="w-3 h-3" />
+          )}
+          {loading ? (
+            <span>Syncing...</span>
+          ) : lastSynced ? (
+            <span>Last synced: {lastSynced.toLocaleTimeString()}</span>
+          ) : error ? (
+            <span>Using built-in data (sync failed)</span>
+          ) : (
+            <span>Using built-in data</span>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-3 mb-6">
