@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>TangoFlow</title>
+    <script>
+      // GitHub Pages SPA redirect: forward 404s back to index.html
+      // preserving the path so client-side routing can handle it
+      var path = window.location.pathname;
+      var base = "/tango-orchestrator";
+      var rest = path.replace(base, "") || "/";
+      sessionStorage.setItem("spa-redirect", rest + window.location.search);
+      window.location.replace(base + "/");
+    </script>
+  </head>
+  <body></body>
+</html>
