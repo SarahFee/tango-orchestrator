@@ -202,8 +202,14 @@ export default function SetPlanner() {
     timelineTandas.forEach((td, i) => {
       if (i > 0) text += "--- CORTINA ---\n";
       if (td) {
-        const orch = getOrchestra(td.orchestraId);
-        text += `${i + 1}. [${td.type.toUpperCase()}] ${orch?.name || td.orchestraId}`;
+        const isMixed = td.tandaMode === "mixed";
+        let orchName: string;
+        if (isMixed && td.orchestraIds && td.orchestraIds.length > 0) {
+          orchName = td.orchestraIds.map((id) => getOrchestra(id)?.name || id).join(" / ");
+        } else {
+          orchName = getOrchestra(td.orchestraId)?.name || td.orchestraId;
+        }
+        text += `${i + 1}. [${td.type.toUpperCase()}${isMixed ? " MIX" : ""}] ${orchName}`;
         if (td.singer) text += ` (${td.singer})`;
         text += ` | ${t("energy")}: ${td.energy.toFixed(1)} | ${td.trackCount} ${t("tracks").toLowerCase()}\n`;
       } else {

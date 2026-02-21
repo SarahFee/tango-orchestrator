@@ -3,7 +3,7 @@ import type { Tanda, TandaType } from "@shared/schema";
 import { getOrchestra, getTTVTTMLabel, getExpectedType } from "@/lib/orchestraData";
 import { EnergyBar } from "./EnergyBar";
 import { TypeBadge } from "./TypeBadge";
-import { X, GripVertical } from "lucide-react";
+import { X, GripVertical, Shuffle } from "lucide-react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useDroppable } from "@dnd-kit/core";
@@ -65,7 +65,14 @@ export function TimelineSlot({
     return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
   }, [startTime, cumulativeMinutes]);
 
-  const orchestra = tanda ? getOrchestra(tanda.orchestraId) : null;
+  const isMixed = tanda?.tandaMode === "mixed";
+  const displayName = useMemo(() => {
+    if (!tanda) return "";
+    if (isMixed && tanda.orchestraIds && tanda.orchestraIds.length > 0) {
+      return tanda.orchestraIds.map((id) => getOrchestra(id)?.name || id).join(" / ");
+    }
+    return getOrchestra(tanda.orchestraId)?.name || tanda.orchestraId;
+  }, [tanda, isMixed]);
 
   return (
     <div ref={setDropRef} className="relative" data-testid={`timeline-slot-${index}`}>
@@ -116,8 +123,13 @@ export function TimelineSlot({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 mb-0.5">
                   <TypeBadge type={tanda.type as TandaType} size="sm" />
+                  {isMixed && (
+                    <span className="inline-flex items-center gap-0.5 text-[9px] font-medium px-1 py-0.5 rounded bg-purple-500/15 text-purple-400">
+                      <Shuffle className="w-2.5 h-2.5" />
+                    </span>
+                  )}
                   <span className="font-serif text-sm font-semibold truncate">
-                    {orchestra?.name || tanda.orchestraId}
+                    {displayName}
                   </span>
                 </div>
                 {tanda.singer && (

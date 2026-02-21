@@ -2,7 +2,7 @@ import type { Tanda, TandaType } from "@shared/schema";
 import { getOrchestra, getStyleLabel } from "@/lib/orchestraData";
 import { EnergyBar } from "./EnergyBar";
 import { TypeBadge } from "./TypeBadge";
-import { GripVertical, X } from "lucide-react";
+import { GripVertical, X, Shuffle } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
 
 interface TandaCardProps {
@@ -15,6 +15,15 @@ interface TandaCardProps {
   className?: string;
 }
 
+function getMixedNames(tanda: Tanda): string {
+  if (!tanda.orchestraIds || tanda.orchestraIds.length === 0) {
+    return getOrchestra(tanda.orchestraId)?.name || tanda.orchestraId;
+  }
+  return tanda.orchestraIds
+    .map((id) => getOrchestra(id)?.name || id)
+    .join(" / ");
+}
+
 export function TandaCard({
   tanda,
   isDragging = false,
@@ -25,8 +34,8 @@ export function TandaCard({
   className = "",
 }: TandaCardProps) {
   const { t } = useLanguage();
-  const orchestra = getOrchestra(tanda.orchestraId);
-  const name = orchestra?.name || tanda.orchestraId;
+  const isMixed = tanda.tandaMode === "mixed";
+  const displayName = isMixed ? getMixedNames(tanda) : (getOrchestra(tanda.orchestraId)?.name || tanda.orchestraId);
 
   return (
     <div
@@ -47,10 +56,16 @@ export function TandaCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 mb-1">
             <TypeBadge type={tanda.type as TandaType} size="sm" />
+            {isMixed && (
+              <span className="inline-flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-400 border border-purple-500/20" data-testid="badge-mixed">
+                <Shuffle className="w-2.5 h-2.5" />
+                {t("tanda_mode_mixed")}
+              </span>
+            )}
             <span className="text-xs text-muted-foreground">{tanda.trackCount} {t("tracks").toLowerCase()}</span>
           </div>
           <p className={`font-serif font-semibold truncate ${compact ? "text-xs" : "text-sm"}`}>
-            {name}
+            {displayName}
           </p>
           {tanda.singer && (
             <p className="text-xs text-muted-foreground truncate">{tanda.singer}</p>

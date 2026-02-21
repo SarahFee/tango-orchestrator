@@ -149,6 +149,19 @@ export function generateWarnings(tandas: (Tanda | null)[]): Warning[] {
     }
   }
 
+  filledTandas.forEach((t, idx) => {
+    if (t.tandaMode === "mixed" && t.type === "tango") {
+      const actualIndex = tandas.indexOf(t);
+      warnings.push({
+        id: `mixed-tango-${actualIndex}`,
+        type: "warning",
+        messageKey: "warning_mixed_tango",
+        messageParams: { slot: actualIndex + 1 },
+        slots: [actualIndex],
+      });
+    }
+  });
+
   const orchestraCounts: Record<string, number> = {};
   filledTandas.forEach((t) => {
     orchestraCounts[t.orchestraId] = (orchestraCounts[t.orchestraId] || 0) + 1;
