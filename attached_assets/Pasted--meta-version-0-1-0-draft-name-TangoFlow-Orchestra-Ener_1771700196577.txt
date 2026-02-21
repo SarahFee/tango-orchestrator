@@ -1,0 +1,1048 @@
+{
+  "meta": {
+    "version": "0.1.0-draft",
+    "name": "TangoFlow Orchestra Energy Database",
+    "description": "Community seed database for tango DJ energy planning. DRAFT — to be validated by experienced tango DJs.",
+    "created": "2026-02-21",
+    "sources": [
+      "Stephen & Susan Brown (tejastango.com) — Classics of Tango Dance Music classifications",
+      "Paul Lohman — The Big Four analysis",
+      "Tango Voice — DJ Fundamentals Part 1 & 2 (energy sequencing framework)",
+      "Tango.org — Fifteen Golden Era Orchestras",
+      "Various DJ workshop handouts and community resources"
+    ],
+    "energy_scale": "1-10 where 1=most subdued/contemplative, 10=most driving/intense. This is DANCE energy (how much physical energy dancers expend), not musical complexity.",
+    "confidence": "low|medium|high — how well-established this classification is in the DJ community",
+    "notes": "Many orchestras changed dramatically across eras. A single orchestra may need 2-4 era-specific profiles. Singer pairings also significantly affect energy and mood."
+  },
+
+  "style_categories": {
+    "harder_rhythmic": "Prominent double-time (ric-tic) accents that insist on milonguero-style dancing. High physical energy.",
+    "softer_rhythmic": "Ric-tic rhythms present but not dominant. Supports both salon and milonguero style. Moderate-high energy.",
+    "smooth": "Instrumental music without prominent rhythmic accents or dramatic pauses. Flowing, elegant. Moderate energy.",
+    "lyrical": "Singer-forward, orchestra plays for the singer. Romantic, emotional. Lower physical but higher emotional energy.",
+    "dramatic": "Big crescendos, dramatic pauses, heavy beat. Intense emotional and physical energy. Complex.",
+    "old_guard": "Pre-golden-age. Simpler arrangements, clear rhythms. Good for warm-up or late-night wind-down.",
+    "transitional": "Post-golden-age concert-influenced sound. Retains dance beat but more complex. Challenging.",
+    "modern_dance": "Contemporary orchestras playing in golden-age dance style. Fresh sound, familiar rhythms.",
+    "neo_tango": "Electronic elements mixed with tango. Ranges from subtle fusion to dominant electronica.",
+    "alternative": "Non-tango music played at milongas. Blues, jazz, world music adapted for tango dancing."
+  },
+
+  "orchestras": [
+
+    {
+      "id": "darienzo",
+      "name": "Juan D'Arienzo",
+      "nickname": "El Rey del Compás (King of the Beat)",
+      "instrument": "violin",
+      "active_years": "1935-1975",
+      "profiles": [
+        {
+          "era": "1935-1945",
+          "era_label": "Classic / Peak Golden Age",
+          "style": "harder_rhythmic",
+          "energy": 9,
+          "mood": "driving",
+          "danceability": 10,
+          "complexity": 3,
+          "tags": ["rhythmic", "milonguero", "high-energy", "crowd-pleaser"],
+          "dj_notes": "The ultimate energy injector. Use to lift energy or fill the floor. Almost impossible to clear the floor with D'Arienzo. Best in mid-evening when dancers are warmed up. Can also open a milonga with simpler instrumentals.",
+          "key_singers": ["Alberto Echagüe", "Héctor Mauré"],
+          "singer_effects": {
+            "instrumental": "Pure rhythm, highest energy. Great for milonguero dancers.",
+            "Echagüe": "Adds drama while keeping rhythmic drive. Slightly less energy than instrumental.",
+            "Mauré": "More lyrical, almost like D'Agostino. Softer feel, good for variety within a D'Arienzo tanda."
+          },
+          "confidence": "high"
+        },
+        {
+          "era": "1945-1955",
+          "era_label": "Later Golden Age",
+          "style": "harder_rhythmic",
+          "energy": 8,
+          "mood": "driving",
+          "danceability": 9,
+          "complexity": 4,
+          "tags": ["rhythmic", "slightly-more-complex"],
+          "dj_notes": "Still very rhythmic but slightly more nuanced than early period. Still a guaranteed floor-filler.",
+          "confidence": "high"
+        },
+        {
+          "era": "1955-1975",
+          "era_label": "Late Period",
+          "style": "harder_rhythmic",
+          "energy": 7,
+          "mood": "driving",
+          "danceability": 7,
+          "complexity": 5,
+          "tags": ["later", "less-common"],
+          "dj_notes": "Less commonly played. Sound becomes more concert-oriented. Use sparingly.",
+          "confidence": "medium"
+        }
+      ]
+    },
+
+    {
+      "id": "di_sarli",
+      "name": "Carlos Di Sarli",
+      "nickname": "El Señor del Tango (The Lord of Tango)",
+      "instrument": "piano",
+      "active_years": "1928-1958",
+      "profiles": [
+        {
+          "era": "1928-1935",
+          "era_label": "Early / Old Guard Style",
+          "style": "softer_rhythmic",
+          "energy": 5,
+          "mood": "rhythmic-walking",
+          "danceability": 7,
+          "complexity": 3,
+          "tags": ["early", "simple-rhythm", "walking"],
+          "dj_notes": "More rhythmic than later Di Sarli. Can work for warm-up due to simpler structure.",
+          "confidence": "medium"
+        },
+        {
+          "era": "1939-1945",
+          "era_label": "Golden Age with Singers",
+          "style": "lyrical",
+          "energy": 6,
+          "mood": "romantic",
+          "danceability": 9,
+          "complexity": 4,
+          "tags": ["lyrical", "romantic", "walking-beat", "piano"],
+          "dj_notes": "Beautiful walking music. The piano always present. Wonderful for salon-style dancing. Romantic and seductive — great for building mood in the evening.",
+          "key_singers": ["Roberto Rufino", "Jorge Durán", "Alberto Podestá"],
+          "singer_effects": {
+            "Rufino": "Warm, romantic. Classic golden-age vocal tangos.",
+            "Durán": "Intense emotional delivery. Higher emotional energy.",
+            "Podestá": "Very emotional, dramatic singer. Increases intensity significantly."
+          },
+          "confidence": "high"
+        },
+        {
+          "era": "1950-1958",
+          "era_label": "Instrumental / Late Period",
+          "style": "smooth",
+          "energy": 5,
+          "mood": "elegant",
+          "danceability": 10,
+          "complexity": 3,
+          "tags": ["instrumental", "smooth", "walking-beat", "elegant", "piano"],
+          "dj_notes": "The quintessential walking tango. Solid, steady beat that's easy to hear. Perfect for newer dancers. Famous instrumentals like Bahía Blanca, El Pollito. One of the best warm-up orchestras because the beat is clear and inviting. Also beautiful late in the evening.",
+          "confidence": "high"
+        }
+      ]
+    },
+
+    {
+      "id": "troilo",
+      "name": "Aníbal Troilo",
+      "nickname": "Pichuco",
+      "instrument": "bandoneón",
+      "active_years": "1937-1971",
+      "profiles": [
+        {
+          "era": "1941-1945",
+          "era_label": "Golden Age with Fiorentino",
+          "style": "softer_rhythmic",
+          "energy": 6,
+          "mood": "playful",
+          "danceability": 8,
+          "complexity": 6,
+          "tags": ["softer-rhythmic", "playful", "bandoneon", "complex-syncopation"],
+          "dj_notes": "Sharp contrasts between staccato and soft moments. Probably the most complex syncopations of the major orchestras — can be the hardest to dance to for beginners. Bandoneón takes center stage. Reserve for mid-evening when dancers are warmed up and connected to the music.",
+          "key_singers": ["Francisco Fiorentino"],
+          "singer_effects": {
+            "Fiorentino": "Classic pairing. Emotionally intense. Romantic and seductive feel that builds mood."
+          },
+          "confidence": "high"
+        },
+        {
+          "era": "1945-1950",
+          "era_label": "Mid Period Instrumentals",
+          "style": "smooth",
+          "energy": 5,
+          "mood": "elegant",
+          "danceability": 8,
+          "complexity": 6,
+          "tags": ["smooth", "instrumental", "refined"],
+          "dj_notes": "Refined, elaborate arrangements. Beautiful smooth sound. Good for building atmosphere without pushing energy too high.",
+          "key_singers": ["Alberto Marino", "Floreal Ruiz", "Edmundo Rivero"],
+          "confidence": "high"
+        },
+        {
+          "era": "1950-1960",
+          "era_label": "Late Period / Concert Transition",
+          "style": "transitional",
+          "energy": 5,
+          "mood": "complex",
+          "danceability": 6,
+          "complexity": 8,
+          "tags": ["concert-influenced", "complex", "less-danceable"],
+          "dj_notes": "Gradually shifts toward concert sound. Some tracks still beautiful for dancing but more challenging. Use selectively.",
+          "confidence": "medium"
+        }
+      ]
+    },
+
+    {
+      "id": "pugliese",
+      "name": "Osvaldo Pugliese",
+      "nickname": "San Pugliese",
+      "instrument": "piano",
+      "active_years": "1943-1995",
+      "profiles": [
+        {
+          "era": "1943-1950",
+          "era_label": "Early Period",
+          "style": "dramatic",
+          "energy": 7,
+          "mood": "dramatic",
+          "danceability": 7,
+          "complexity": 7,
+          "tags": ["dramatic", "yumba", "passionate", "contrasts"],
+          "dj_notes": "The signature 'yumba' beat. Dramatic pauses, intense build-ups. Not for beginners. Creates a special energy on the floor — dancers either love it or find it too demanding. Two groups at every milonga: those who love Pugliese and those who sit it out. Place strategically — mid-to-late evening when advanced dancers are engaged.",
+          "confidence": "high"
+        },
+        {
+          "era": "1950-1960",
+          "era_label": "Peak Dramatic Period",
+          "style": "dramatic",
+          "energy": 8,
+          "mood": "dramatic",
+          "danceability": 7,
+          "complexity": 8,
+          "tags": ["dramatic", "intense", "contrast", "free-rhythmic"],
+          "dj_notes": "Most intense Pugliese. Strong contrasts between free and rhythmic sections. Unexpected turns. Remarkable for maintaining dance rhythms even as arrangements become more complex. Opens embrace — dancers do giros, paradas, suspensions rather than walking.",
+          "confidence": "high"
+        },
+        {
+          "era": "1960-1980",
+          "era_label": "Late Concert Period",
+          "style": "dramatic",
+          "energy": 7,
+          "mood": "dramatic",
+          "danceability": 5,
+          "complexity": 9,
+          "tags": ["concert", "complex", "advanced-only"],
+          "dj_notes": "Very complex, concert-hall oriented but still maintains connection to dance rhythms. For experienced dancers and DJs only. Some pieces are beloved classics despite their complexity.",
+          "confidence": "medium"
+        }
+      ]
+    },
+
+    {
+      "id": "biagi",
+      "name": "Rodolfo Biagi",
+      "nickname": "Manos Brujas (Magic Hands)",
+      "instrument": "piano",
+      "active_years": "1938-1969",
+      "profiles": [
+        {
+          "era": "1938-1950",
+          "era_label": "Golden Age",
+          "style": "harder_rhythmic",
+          "energy": 8,
+          "mood": "driving-syncopated",
+          "danceability": 8,
+          "complexity": 6,
+          "tags": ["rhythmic", "syncopated", "milonguero", "piano", "gaps"],
+          "dj_notes": "Was D'Arienzo's pianist and kept the rhythmic drive but added striking syncopated elements — gaps in rhythm that feel like an elevator shaft dropping. Hugely popular with milonguero-style dancers. Can get lost in noisy rooms with poor sound. Some Biagi tandas with Amor have a wonderful romantic feel despite the rhythmic base.",
+          "key_singers": ["Jorge Ortiz", "Andrés Falgas", "Teófilo Ibáñez", "Alberto Amor"],
+          "singer_effects": {
+            "Ortiz": "Classic vocal pairing. Maintains rhythmic drive.",
+            "Amor": "More sensual and romantic side. Softer rhythmic feel."
+          },
+          "confidence": "high"
+        }
+      ]
+    },
+
+    {
+      "id": "tanturi",
+      "name": "Ricardo Tanturi",
+      "nickname": "El Caballero del Tango",
+      "instrument": "piano",
+      "active_years": "1937-1956",
+      "profiles": [
+        {
+          "era": "1940-1944",
+          "era_label": "With Castillo",
+          "style": "softer_rhythmic",
+          "energy": 7,
+          "mood": "energetic-fun",
+          "danceability": 9,
+          "complexity": 4,
+          "tags": ["softer-rhythmic", "accessible", "fun", "D'Arienzo-influenced"],
+          "dj_notes": "Influenced by D'Arienzo's rhythmic style but softer. Very accessible, great dance music. Castillo is an energetic, theatrical singer. Good mid-evening energy builder.",
+          "key_singers": ["Alberto Castillo"],
+          "singer_effects": {
+            "Castillo": "Theatrical, energetic delivery. One of the most recognizable voices. Conveys significant emotional intensity."
+          },
+          "confidence": "high"
+        },
+        {
+          "era": "1943-1945",
+          "era_label": "With Campos",
+          "style": "softer_rhythmic",
+          "energy": 5,
+          "mood": "romantic",
+          "danceability": 8,
+          "complexity": 4,
+          "tags": ["romantic", "softer", "lyrical"],
+          "dj_notes": "Very different feel from Castillo tandas. More romantic and gentle. Good for variety and mood-building.",
+          "key_singers": ["Enrique Campos"],
+          "singer_effects": {
+            "Campos": "Gentle, romantic delivery. Emotional but not intense."
+          },
+          "confidence": "high"
+        }
+      ]
+    },
+
+    {
+      "id": "calo",
+      "name": "Miguel Caló",
+      "nickname": null,
+      "instrument": "bandoneón",
+      "active_years": "1934-1960",
+      "profiles": [
+        {
+          "era": "1942-1945",
+          "era_label": "Golden Age",
+          "style": "lyrical",
+          "energy": 5,
+          "mood": "romantic",
+          "danceability": 8,
+          "complexity": 5,
+          "tags": ["lyrical", "romantic", "emotional", "great-singers"],
+          "dj_notes": "Quite romantic music with great singers. Emotionally intense but not physically demanding. Good for building romantic atmosphere. Reserve for when you want to bring energy DOWN but keep dancers emotionally engaged.",
+          "key_singers": ["Raúl Berón", "Alberto Podestá", "Raúl Iriarte"],
+          "singer_effects": {
+            "Berón": "Emotional, powerful voice. One of the great tango singers.",
+            "Podestá": "Intense emotional delivery. Dramatic.",
+            "Iriarte": "Emotional, memorable voice. Classics like 'Cuando tallan los recuerdos'."
+          },
+          "confidence": "high"
+        }
+      ]
+    },
+
+    {
+      "id": "dagostino",
+      "name": "Ángel D'Agostino",
+      "nickname": "El Ángel",
+      "instrument": "piano",
+      "active_years": "1934-1958",
+      "profiles": [
+        {
+          "era": "1940-1945",
+          "era_label": "Golden Age with Vargas",
+          "style": "softer_rhythmic",
+          "energy": 5,
+          "mood": "ethereal",
+          "danceability": 8,
+          "complexity": 3,
+          "tags": ["ethereal", "spacious", "Di-Sarli-influenced", "gentle"],
+          "dj_notes": "Influenced by Di Sarli. Ethereal and spacious quality. Playful magic that is beloved by milongueros. Together with Vargas they recorded softer-rhythmic music with a dreamy quality. Slower tempo, good for early evening or after a high-energy block.",
+          "key_singers": ["Ángel Vargas"],
+          "singer_effects": {
+            "Vargas": "Inseparable pairing ('Los Ángeles'). Vargas conveys significant emotional intensity with a gentle touch."
+          },
+          "confidence": "high"
+        }
+      ]
+    },
+
+    {
+      "id": "laurenz",
+      "name": "Pedro Laurenz",
+      "nickname": null,
+      "instrument": "bandoneón",
+      "active_years": "1934-1960",
+      "profiles": [
+        {
+          "era": "1937-1945",
+          "era_label": "Golden Age",
+          "style": "softer_rhythmic",
+          "energy": 6,
+          "mood": "intense-rhythmic",
+          "danceability": 8,
+          "complexity": 5,
+          "tags": ["softer-rhythmic", "bandoneon", "milonguero-favorite"],
+          "dj_notes": "Excellent dance music with softer rhythmic accents. Bandoneón-driven. Milonguero favorite. Can generate additional physical energy through syncopation without exhausting dancers.",
+          "key_singers": ["Alberto Podestá", "Juan Carlos Casas"],
+          "singer_effects": {
+            "Podestá": "Adds emotional intensity. One of the great tango voices."
+          },
+          "confidence": "medium"
+        }
+      ]
+    },
+
+    {
+      "id": "canaro",
+      "name": "Francisco Canaro",
+      "nickname": "Pirincho",
+      "instrument": "violin",
+      "active_years": "1906-1964",
+      "profiles": [
+        {
+          "era": "1927-1938",
+          "era_label": "Early / Transition Period",
+          "style": "old_guard",
+          "energy": 4,
+          "mood": "simple-rhythmic",
+          "danceability": 7,
+          "complexity": 2,
+          "tags": ["old-guard", "simple", "warm-up", "clear-rhythm"],
+          "dj_notes": "Earlier material is more rhythmic with simpler arrangements. Good warm-up music. His milongas are generally the slowest and easiest to dance to — most frequently played milongas at tango dances. Clear, simple rhythms help dancers find the beat.",
+          "confidence": "high"
+        },
+        {
+          "era": "1935-1950",
+          "era_label": "Golden Age Lyrical",
+          "style": "lyrical",
+          "energy": 4,
+          "mood": "romantic",
+          "danceability": 7,
+          "complexity": 3,
+          "tags": ["lyrical", "romantic", "singer-forward"],
+          "dj_notes": "Later recordings have a more lyrical sensibility. Beautiful waltzes. Romantic feel. Not the most exciting but reliable and comfortable for dancers.",
+          "key_singers": ["Roberto Maida", "Ada Falcón", "Ernesto Famá"],
+          "singer_effects": {
+            "Maida": "Classic romantic delivery. Slower, lyrical feel."
+          },
+          "confidence": "high"
+        }
+      ]
+    },
+
+    {
+      "id": "de_angelis",
+      "name": "Alfredo De Angelis",
+      "nickname": null,
+      "instrument": "piano",
+      "active_years": "1941-1977",
+      "profiles": [
+        {
+          "era": "1943-1958",
+          "era_label": "Golden Age / Peak",
+          "style": "dramatic",
+          "energy": 6,
+          "mood": "smooth-dramatic",
+          "danceability": 8,
+          "complexity": 5,
+          "tags": ["between-Di-Sarli-and-Pugliese", "solid-dance", "energetic-milongas"],
+          "dj_notes": "Not a great innovator but created solid dance music that sits between the smoothness of Di Sarli and the drama of Pugliese. Very good for bridging different energy levels. His milongas (like 'Pregonera') are energetic and popular. Good variety orchestra.",
+          "key_singers": ["Carlos Dante", "Julio Martel", "Oscar Larroca"],
+          "singer_effects": {
+            "Dante/Martel": "Slower, more lyrical. Good for earlier in the evening."
+          },
+          "confidence": "high"
+        }
+      ]
+    },
+
+    {
+      "id": "donato",
+      "name": "Edgardo Donato",
+      "nickname": null,
+      "instrument": "violin",
+      "active_years": "1930-1945",
+      "profiles": [
+        {
+          "era": "1932-1942",
+          "era_label": "Golden Age",
+          "style": "softer_rhythmic",
+          "energy": 6,
+          "mood": "punchy-fun",
+          "danceability": 8,
+          "complexity": 3,
+          "tags": ["punchy", "fun", "more-punch-than-Canaro", "good-milongas"],
+          "dj_notes": "Had more punch than Canaro. Fun, accessible dance music. His milongas are high priority for selection — easy to construct homogeneous tandas. Good warm-up or energy-maintenance choice. Clear rhythms suitable for first cycle of tandas.",
+          "confidence": "medium"
+        }
+      ]
+    },
+
+    {
+      "id": "demare",
+      "name": "Lucio Demare",
+      "nickname": null,
+      "instrument": "piano",
+      "active_years": "1938-1970",
+      "profiles": [
+        {
+          "era": "1942-1948",
+          "era_label": "Golden Age",
+          "style": "lyrical",
+          "energy": 4,
+          "mood": "romantic-gentle",
+          "danceability": 8,
+          "complexity": 4,
+          "tags": ["lyrical", "romantic", "gentle", "clear-rhythm"],
+          "dj_notes": "Romantic and gentle with clear rhythms. Good for warming up or bringing energy down gently. Waltzes are particularly lovely. Suitable in first cycle of tandas due to clear, simpler rhythms.",
+          "key_singers": ["Raúl Berón", "Juan Carlos Miranda"],
+          "singer_effects": {
+            "Berón": "Adds emotional depth. Beautiful pairing."
+          },
+          "confidence": "medium"
+        }
+      ]
+    },
+
+    {
+      "id": "fresedo",
+      "name": "Osvaldo Fresedo",
+      "nickname": "El Pibe de La Paternal",
+      "instrument": "bandoneón",
+      "active_years": "1920-1980",
+      "profiles": [
+        {
+          "era": "1925-1935",
+          "era_label": "Early Golden Age",
+          "style": "old_guard",
+          "energy": 4,
+          "mood": "elegant-early",
+          "danceability": 6,
+          "complexity": 3,
+          "tags": ["early", "elegant", "transition"],
+          "dj_notes": "Associated with the early golden age. Elegant, smooth sound.",
+          "confidence": "medium"
+        },
+        {
+          "era": "1935-1955",
+          "era_label": "Golden Age Smooth",
+          "style": "smooth",
+          "energy": 4,
+          "mood": "pink-champagne",
+          "danceability": 7,
+          "complexity": 3,
+          "tags": ["smooth", "sweet", "light", "romantic", "pink-champagne"],
+          "dj_notes": "Described as 'Pink Champagne' tango — sweet, light, and very romantic. Some recordings have rhythmic elements supporting milonguero-style dancing, but most dancers treat the music as smooth. Good for warm-up or early evening. Clear, simpler rhythms suitable for first tanda cycles.",
+          "key_singers": ["Roberto Ray", "Oscar Serpa"],
+          "singer_effects": {
+            "Ray": "Sweet, romantic delivery. Enhances the 'pink champagne' quality."
+          },
+          "confidence": "high"
+        }
+      ]
+    },
+
+    {
+      "id": "rodriguez",
+      "name": "Enrique Rodríguez",
+      "nickname": null,
+      "instrument": "piano",
+      "active_years": "1936-1971",
+      "profiles": [
+        {
+          "era": "1938-1950",
+          "era_label": "Golden Age",
+          "style": "harder_rhythmic",
+          "energy": 7,
+          "mood": "rhythmic-accessible",
+          "danceability": 9,
+          "complexity": 3,
+          "tags": ["harder-rhythmic", "accessible", "clear-beat", "warm-up-friendly"],
+          "dj_notes": "Harder rhythmic style like D'Arienzo and Biagi but generally more accessible. Clear, simple rhythms. Good for warm-up and first cycle of tandas. Reliable floor-filler.",
+          "key_singers": ["Roberto Flores", "Armando Moreno"],
+          "confidence": "medium"
+        }
+      ]
+    },
+
+    {
+      "id": "gobbi",
+      "name": "Alfredo Gobbi",
+      "nickname": null,
+      "instrument": "violin",
+      "active_years": "1942-1965",
+      "profiles": [
+        {
+          "era": "1947-1958",
+          "era_label": "Golden Age / Transitional",
+          "style": "softer_rhythmic",
+          "energy": 5,
+          "mood": "varied",
+          "danceability": 7,
+          "complexity": 6,
+          "tags": ["underappreciated", "varied", "interesting"],
+          "dj_notes": "Not as commonly played as the major orchestras but has some classic instrumentals. Somewhat complex rhythms. For DJs looking to add variety.",
+          "confidence": "low"
+        }
+      ]
+    },
+
+    {
+      "id": "otv",
+      "name": "Orquesta Típica Victor",
+      "nickname": "OTV",
+      "instrument": "studio orchestra",
+      "active_years": "1925-1944",
+      "profiles": [
+        {
+          "era": "1926-1940",
+          "era_label": "Golden / Transition",
+          "style": "old_guard",
+          "energy": 5,
+          "mood": "classic-rhythmic",
+          "danceability": 8,
+          "complexity": 3,
+          "tags": ["old-guard", "studio", "strong-rhythms", "classic"],
+          "dj_notes": "Led by Adolfo Carabelli with finest musicians. One of the first old guard orchestras to adopt golden-age 4x4 style. Strong rhythms for dancing. Classic instrumental tracks. Good for warm-up or early in the evening when simple rhythms help dancers find the beat. Also usable as a 'coffee' tanda in the morning hours at marathons.",
+          "confidence": "medium"
+        }
+      ]
+    },
+
+    {
+      "id": "firpo",
+      "name": "Roberto Firpo",
+      "nickname": null,
+      "instrument": "piano",
+      "active_years": "1913-1959",
+      "profiles": [
+        {
+          "era": "1913-1940",
+          "era_label": "Old Guard / Early Golden",
+          "style": "old_guard",
+          "energy": 4,
+          "mood": "classic",
+          "danceability": 6,
+          "complexity": 2,
+          "tags": ["old-guard", "pioneer", "simple"],
+          "dj_notes": "Pioneer of tango. Older recordings have simple rhythms. Use sparingly, early in the evening or at marathons for dawn sets.",
+          "confidence": "low"
+        }
+      ]
+    },
+
+    {
+      "id": "lomuto",
+      "name": "Francisco Lomuto",
+      "nickname": null,
+      "instrument": "piano",
+      "active_years": "1921-1950",
+      "profiles": [
+        {
+          "era": "1927-1940",
+          "era_label": "Golden / Transition",
+          "style": "old_guard",
+          "energy": 4,
+          "mood": "simple-pleasant",
+          "danceability": 7,
+          "complexity": 2,
+          "tags": ["old-guard", "simple", "pleasant"],
+          "dj_notes": "Simple, pleasant dance music. Good for warm-up tandas. Not a headliner but useful for building a set.",
+          "confidence": "low"
+        }
+      ]
+    },
+
+    {
+      "id": "de_caro",
+      "name": "Julio De Caro",
+      "nickname": null,
+      "instrument": "violin",
+      "active_years": "1924-1953",
+      "profiles": [
+        {
+          "era": "1924-1940",
+          "era_label": "Early Golden Age / Innovator",
+          "style": "old_guard",
+          "energy": 4,
+          "mood": "innovative",
+          "danceability": 6,
+          "complexity": 5,
+          "tags": ["innovative", "early", "influential", "rare"],
+          "dj_notes": "Hugely influential on later orchestras (especially Pugliese) but rarely played at milongas. More of a listening/historical interest. Some DJs use sparingly for variety.",
+          "confidence": "low"
+        }
+      ]
+    },
+
+    {
+      "id": "sassone",
+      "name": "Florindo Sassone",
+      "nickname": null,
+      "instrument": "violin",
+      "active_years": "1948-1982",
+      "profiles": [
+        {
+          "era": "1950-1970",
+          "era_label": "Post-Golden / Transitional",
+          "style": "transitional",
+          "energy": 6,
+          "mood": "milonguero-friendly",
+          "danceability": 7,
+          "complexity": 5,
+          "tags": ["transitional", "milonguero", "solid"],
+          "dj_notes": "Retained a dance beat while developing dramatic tension of concert tango. 'Bien Milonguero' series is well-named — several classic tracks. Solid choice for adding post-golden-age variety.",
+          "confidence": "medium"
+        }
+      ]
+    },
+
+    {
+      "id": "varela",
+      "name": "Héctor Varela",
+      "nickname": null,
+      "instrument": "bandoneón",
+      "active_years": "1950-1980",
+      "profiles": [
+        {
+          "era": "1950-1965",
+          "era_label": "Post-Golden Age",
+          "style": "transitional",
+          "energy": 6,
+          "mood": "energetic",
+          "danceability": 7,
+          "complexity": 5,
+          "tags": ["post-golden", "energetic", "transitional"],
+          "dj_notes": "Post-golden-age orchestra that maintained danceable qualities. Good for adding era variety to a set.",
+          "confidence": "low"
+        }
+      ]
+    },
+
+    {
+      "id": "francini_pontier",
+      "name": "Francini-Pontier",
+      "nickname": null,
+      "instrument": "violin/bandoneón",
+      "active_years": "1946-1955",
+      "profiles": [
+        {
+          "era": "1946-1955",
+          "era_label": "Late Golden Age",
+          "style": "smooth",
+          "energy": 5,
+          "mood": "refined",
+          "danceability": 7,
+          "complexity": 6,
+          "tags": ["refined", "elegant", "late-golden"],
+          "dj_notes": "Refined, elegant sound. Not as commonly played but some beautiful tracks for salon-style dancing.",
+          "confidence": "low"
+        }
+      ]
+    },
+
+    {
+      "id": "federico",
+      "name": "Leopoldo Federico",
+      "nickname": null,
+      "instrument": "bandoneón",
+      "active_years": "1953-2010",
+      "profiles": [
+        {
+          "era": "1953-1970",
+          "era_label": "Transitional",
+          "style": "transitional",
+          "energy": 6,
+          "mood": "dramatic-danceable",
+          "danceability": 7,
+          "complexity": 6,
+          "tags": ["transitional", "dramatic", "softer-rhythmic"],
+          "dj_notes": "Followed Pugliese's example but retained a dance beat. Challenging but rewarding music. Some tracks played as softer-rhythmic.",
+          "confidence": "low"
+        }
+      ]
+    },
+
+    {
+      "id": "color_tango",
+      "name": "Orquesta Color Tango",
+      "nickname": null,
+      "instrument": "full orchestra",
+      "active_years": "1989-present",
+      "profiles": [
+        {
+          "era": "1989-present",
+          "era_label": "Modern Dance Orchestra",
+          "style": "modern_dance",
+          "energy": 7,
+          "mood": "neo-pugliese",
+          "danceability": 8,
+          "complexity": 6,
+          "tags": ["modern", "Pugliese-inspired", "high-fidelity", "dramatic"],
+          "dj_notes": "Derivative of the Pugliese sound with much greater recording fidelity. Modern sound, golden-age dance spirit. Good for introducing dancers to dramatic tango with better audio quality. Popular at milongas worldwide.",
+          "confidence": "medium"
+        }
+      ]
+    },
+
+    {
+      "id": "sexteto_milonguero",
+      "name": "Sexteto Milonguero",
+      "nickname": null,
+      "instrument": "sextet",
+      "active_years": "2006-2020",
+      "profiles": [
+        {
+          "era": "2006-2020",
+          "era_label": "Modern Dance Orchestra",
+          "style": "modern_dance",
+          "energy": 8,
+          "mood": "energetic-fresh",
+          "danceability": 9,
+          "complexity": 4,
+          "tags": ["modern", "energetic", "fresh", "crowd-pleaser", "Javier-Di-Ciriaco"],
+          "dj_notes": "Considered the 'hottest' tango orchestra worldwide for years. Classic arrangements paired with joy of playing. Fresh, contemporary interpretations of standards. Brought halls to a boil. Great for energy injection with modern sound quality.",
+          "confidence": "medium"
+        }
+      ]
+    },
+
+    {
+      "id": "el_arranque",
+      "name": "Orquesta El Arranque",
+      "nickname": null,
+      "instrument": "full orchestra",
+      "active_years": "1996-present",
+      "profiles": [
+        {
+          "era": "1996-present",
+          "era_label": "Modern Dance Orchestra",
+          "style": "modern_dance",
+          "energy": 7,
+          "mood": "classic-revival",
+          "danceability": 8,
+          "complexity": 5,
+          "tags": ["modern", "revival", "golden-age-style"],
+          "dj_notes": "Modern orchestra playing in golden-age dance style. Reliable for adding contemporary tracks to an otherwise traditional set.",
+          "confidence": "low"
+        }
+      ]
+    },
+
+    {
+      "id": "misteriosa",
+      "name": "Orquesta Típica Misteriosa Buenos Aires",
+      "nickname": null,
+      "instrument": "full orchestra",
+      "active_years": "2003-present",
+      "profiles": [
+        {
+          "era": "2003-present",
+          "era_label": "Modern Dance Orchestra",
+          "style": "modern_dance",
+          "energy": 6,
+          "mood": "atmospheric",
+          "danceability": 7,
+          "complexity": 5,
+          "tags": ["modern", "atmospheric", "quality"],
+          "dj_notes": "Well-regarded modern orchestra. Good for variety. Some DJs have it as a personal favorite for its atmospheric quality.",
+          "confidence": "low"
+        }
+      ]
+    },
+
+    {
+      "id": "romantica_milonguera",
+      "name": "La Romántica Milonguera",
+      "nickname": null,
+      "instrument": "full orchestra",
+      "active_years": "2010s-present",
+      "profiles": [
+        {
+          "era": "2010s-present",
+          "era_label": "Modern Dance Orchestra",
+          "style": "modern_dance",
+          "energy": 5,
+          "mood": "romantic-modern",
+          "danceability": 8,
+          "complexity": 4,
+          "tags": ["modern", "romantic", "accessible"],
+          "dj_notes": "As the name suggests — romantic feel, modern sound, danceable. Good for mood-building with contemporary audio quality.",
+          "confidence": "low"
+        }
+      ]
+    },
+
+    {
+      "id": "otros_aires",
+      "name": "Otros Aires",
+      "nickname": null,
+      "instrument": "electronic/acoustic hybrid",
+      "active_years": "2003-present",
+      "profiles": [
+        {
+          "era": "2003-present",
+          "era_label": "Neo-Tango / Fusion",
+          "style": "neo_tango",
+          "energy": 6,
+          "mood": "electronic-tango",
+          "danceability": 7,
+          "complexity": 4,
+          "tags": ["neo-tango", "electronic", "fusion", "accessible"],
+          "dj_notes": "Classic tangos and milongas layered with electronica. Many tracks work well but can sound similar to each other. 'Milonga Sentimental' is a standout. Use sparingly — one neo-tango tanda per evening maximum at traditional milongas. More accepted at practicas and alternative milongas.",
+          "confidence": "medium"
+        }
+      ]
+    },
+
+    {
+      "id": "gotan_project",
+      "name": "Gotan Project",
+      "nickname": null,
+      "instrument": "electronic/acoustic hybrid",
+      "active_years": "1999-2014",
+      "profiles": [
+        {
+          "era": "1999-2014",
+          "era_label": "Neo-Tango / Electro",
+          "style": "neo_tango",
+          "energy": 6,
+          "mood": "lounge-tango",
+          "danceability": 6,
+          "complexity": 3,
+          "tags": ["neo-tango", "electronic", "lounge", "famous"],
+          "dj_notes": "The most internationally famous electro-tango group. Introduced many people to tango through electronic music. Divisive at traditional milongas — some love it, many purists dislike it. Best for alternative milongas or as a very occasional surprise.",
+          "confidence": "medium"
+        }
+      ]
+    },
+
+    {
+      "id": "tanghetto",
+      "name": "Tanghetto",
+      "nickname": null,
+      "instrument": "electronic",
+      "active_years": "2002-present",
+      "profiles": [
+        {
+          "era": "2002-present",
+          "era_label": "Neo-Tango / Club",
+          "style": "neo_tango",
+          "energy": 7,
+          "mood": "club-nocturnal",
+          "danceability": 6,
+          "complexity": 3,
+          "tags": ["neo-tango", "club", "jazz-lounge", "nocturnal"],
+          "dj_notes": "Nocturnal jazz/lounge element with club-tango sound. Tracks can sound similar. 'Una Llamada' and 'Inmigrante' are standouts. For alternative milongas.",
+          "confidence": "low"
+        }
+      ]
+    },
+
+    {
+      "id": "bajofondo",
+      "name": "Bajofondo",
+      "nickname": null,
+      "instrument": "electronic",
+      "active_years": "2001-present",
+      "profiles": [
+        {
+          "era": "2001-present",
+          "era_label": "Neo-Tango / Club",
+          "style": "neo_tango",
+          "energy": 7,
+          "mood": "electronic-driving",
+          "danceability": 5,
+          "complexity": 4,
+          "tags": ["neo-tango", "electronic", "club", "driving"],
+          "dj_notes": "More electronic than acoustic. Club tango sound. Limited use at traditional milongas but some tracks work at alternative events. Divisive.",
+          "confidence": "low"
+        }
+      ]
+    },
+
+    {
+      "id": "libedinsky",
+      "name": "Carlos Libedinsky",
+      "nickname": null,
+      "instrument": "electronic/bandoneón",
+      "active_years": "2002-present",
+      "profiles": [
+        {
+          "era": "2002-present",
+          "era_label": "Neo-Tango / Subtle Electronic",
+          "style": "neo_tango",
+          "energy": 6,
+          "mood": "subtle-electronic",
+          "danceability": 7,
+          "complexity": 4,
+          "tags": ["neo-tango", "subtle", "electronic", "bandoneón"],
+          "dj_notes": "Good example of subtle electronic elements mixed with tango. More accepted at traditional milongas than heavy electro-tango. 'Vi Luz y Subí' is widely played.",
+          "confidence": "medium"
+        }
+      ]
+    }
+  ],
+
+  "type_modifiers": {
+    "description": "Energy adjustments based on tanda type. Apply to base orchestra energy.",
+    "tango": {
+      "energy_modifier": 0,
+      "notes": "Baseline. 4/4 time. The standard."
+    },
+    "vals": {
+      "energy_modifier": -1.0,
+      "notes": "3/4 time waltz. Generally lighter, more romantic feel. Physically increases tempo (faster footwork) but emotionally provides breathing room. Net effect: slight energy reduction from tango baseline. Place between tango tandas for contrast."
+    },
+    "milonga": {
+      "energy_modifier": 1.5,
+      "notes": "2/4 time. Faster, more playful. Highest physical energy tanda type. Place strategically — usually the energy peak within a TTV/TTM cycle. Canaro's milongas are slowest/easiest, D'Arienzo's are more driving."
+    }
+  },
+
+  "cortina_notes": "Cortinas (short musical clips between tandas) are NOT scored for energy but serve as palette cleansers. Common choices: jazz, rock, Argentine folklore, world music. Length: typically 30-60 seconds. Essential for the TTVTTM structure.",
+
+  "tanda_structure": {
+    "TTVTTM": {
+      "description": "The traditional tanda pattern: Tango-Tango-Vals-Tango-Tango-Milonga, then repeat. This is the most common structure at Buenos Aires milongas and traditional milongas worldwide.",
+      "cycle_length": 6,
+      "example_energy_shape": "Medium → Medium-High → Breathing Room → Medium-High → High → Peak → (repeat)"
+    },
+    "TTTV_TTTM": {
+      "description": "Extended pattern with 3 tango tandas between vals/milonga. Used at longer milongas or when the DJ wants more tango variety.",
+      "cycle_length": 8
+    }
+  },
+
+  "placement_guidelines": {
+    "warm_up": {
+      "position": "First 2-3 tandas",
+      "recommended_orchestras": ["canaro", "di_sarli", "rodriguez", "donato", "demare", "fresedo", "otv", "lomuto"],
+      "energy_range": [3, 5],
+      "notes": "Clear, simple rhythms. Slower tempo. Help dancers find the beat. Music with clear and simpler rhythms is appropriate. More challenging rhythms (Pugliese, Biagi, Troilo) held in reserve."
+    },
+    "building": {
+      "position": "Tandas 3-6",
+      "recommended_orchestras": ["darienzo", "tanturi", "dagostino", "laurenz", "calo", "donato"],
+      "energy_range": [5, 7],
+      "notes": "Gradually increase intensity. Mix rhythmic and lyrical tandas. Introduce softer-rhythmic orchestras."
+    },
+    "peak": {
+      "position": "Tandas 7-10 (mid-evening)",
+      "recommended_orchestras": ["darienzo", "biagi", "pugliese", "troilo"],
+      "energy_range": [7, 9],
+      "notes": "Highest energy. The big orchestras. D'Arienzo and Biagi for rhythmic peaks, Pugliese for dramatic peaks. This is where advanced dancers are most engaged."
+    },
+    "cool_down_1": {
+      "position": "After first peak",
+      "recommended_orchestras": ["di_sarli", "calo", "dagostino", "demare", "fresedo"],
+      "energy_range": [4, 6],
+      "notes": "Bring energy down with lyrical/smooth orchestras. Romantic mood. Dancers need to breathe."
+    },
+    "second_peak": {
+      "position": "Tandas 12-14",
+      "recommended_orchestras": ["darienzo", "biagi", "troilo", "tanturi"],
+      "energy_range": [7, 9],
+      "notes": "Second energy surge. Can be even more intense than first peak for shorter milongas."
+    },
+    "wind_down": {
+      "position": "Last 2-3 tandas",
+      "recommended_orchestras": ["di_sarli", "canaro", "fresedo", "dagostino"],
+      "energy_range": [3, 5],
+      "notes": "Gentle landing. Romantic, smooth music. The milonga ends with La Cumparsita."
+    },
+    "la_cumparsita": {
+      "position": "Final tanda",
+      "notes": "Traditionally, the evening ends with 2+ versions of La Cumparsita. Dancers dance the first with whoever is nearby, second with someone special. Every DJ needs multiple versions ready."
+    }
+  }
+}

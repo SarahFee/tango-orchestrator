@@ -1,0 +1,522 @@
+# Replit Prompt: TangoFlow — Milonga Set Planner (Phase 1 Only)
+
+```
+Build a web app called "TangoFlow" — a visual milonga set planning tool for Argentine tango DJs. This is Phase 1 ONLY: the Milonga Set Planner. No user accounts, no music playback, no Spotify integration. Just the planning tool.
+
+## WHAT THIS APP DOES
+
+A tango DJ plans a 3-4 hour evening ("milonga") by arranging "tandas" (sets of 3-4 songs from the same orchestra/style) into a timeline. Between tandas, short "cortinas" (palette-cleansing clips) signal partner changes. The DJ must:
+- Follow the TTVTTM pattern: Tango-Tango-Vals-Tango-Tango-Milonga, repeating
+- Manage energy — build up, peak, cool down, peak again, wind down
+- Avoid repeating orchestras back-to-back
+- Balance rhythmic, lyrical, dramatic, and smooth styles
+- End with "La Cumparsita" (tradition)
+
+This app is the visual planning layer that no existing tango DJ software provides.
+
+## TECH STACK
+- Frontend: React 18+ with TypeScript
+- Styling: Tailwind CSS (dark theme — deep blacks, golds, reds inspired by milonga ambiance)
+- Backend: Node.js with Express (minimal — mainly serves the orchestra DB and saves/loads sets)
+- Storage: SQLite for saved sets (keep it simple)
+- No AI, no external APIs, no auth for Phase 1
+
+## DESIGN AESTHETIC
+- Dark theme: deep black (#0f0b09), warm golds (#c9a84c), muted reds (#c94c4c)
+- Typography: Playfair Display for headings, DM Sans for body
+- Feel: elegant, warm, Buenos Aires milonga atmosphere — NOT a generic SaaS dashboard
+- Tango color-coding: Tango = red (#c94c4c), Vals = blue (#4c8ec9), Milonga = green (#4cc96a)
+- Subtle textures, not flat — think candlelit room, not fluorescent office
+
+## DATA: ORCHESTRA DATABASE (embed this JSON as seed data)
+
+The app ships with a pre-loaded orchestra database. Here is the complete seed data to embed:
+
+{
+  "style_categories": {
+    "harder_rhythmic": "Prominent double-time accents. High physical energy.",
+    "softer_rhythmic": "Rhythmic but gentler. Moderate-high energy.",
+    "smooth": "Flowing, elegant, no dramatic pauses. Moderate energy.",
+    "lyrical": "Singer-forward, romantic. Lower physical, higher emotional energy.",
+    "dramatic": "Big crescendos, dramatic pauses, heavy beat. Intense.",
+    "old_guard": "Pre-golden-age. Simple rhythms. Good for warm-up.",
+    "modern_dance": "Contemporary orchestras in golden-age style.",
+    "neo_tango": "Electronic elements mixed with tango."
+  },
+
+  "orchestras": [
+    {
+      "id": "darienzo",
+      "name": "Juan D'Arienzo",
+      "nickname": "El Rey del Compás",
+      "profiles": [
+        {
+          "era": "1935-1945",
+          "style": "harder_rhythmic",
+          "energy": 9,
+          "mood": "driving",
+          "danceability": 10,
+          "complexity": 3,
+          "tags": ["rhythmic", "milonguero", "high-energy", "crowd-pleaser"],
+          "key_singers": ["Alberto Echagüe", "Héctor Mauré"],
+          "dj_notes": "The ultimate energy injector. Use to lift energy or fill the floor."
+        }
+      ]
+    },
+    {
+      "id": "di_sarli",
+      "name": "Carlos Di Sarli",
+      "nickname": "El Señor del Tango",
+      "profiles": [
+        {
+          "era": "1939-1945",
+          "style": "lyrical",
+          "energy": 6,
+          "mood": "romantic",
+          "danceability": 9,
+          "complexity": 4,
+          "key_singers": ["Roberto Rufino", "Jorge Durán", "Alberto Podestá"],
+          "dj_notes": "Beautiful walking music. Romantic, seductive. Great for mood-building."
+        },
+        {
+          "era": "1950-1958",
+          "style": "smooth",
+          "energy": 5,
+          "mood": "elegant",
+          "danceability": 10,
+          "complexity": 3,
+          "dj_notes": "Quintessential walking tango. Perfect for warm-up or wind-down."
+        }
+      ]
+    },
+    {
+      "id": "troilo",
+      "name": "Aníbal Troilo",
+      "nickname": "Pichuco",
+      "profiles": [
+        {
+          "era": "1941-1945",
+          "style": "softer_rhythmic",
+          "energy": 6,
+          "mood": "playful",
+          "danceability": 8,
+          "complexity": 6,
+          "key_singers": ["Francisco Fiorentino"],
+          "dj_notes": "Complex syncopations. Reserve for mid-evening when dancers are warmed up."
+        }
+      ]
+    },
+    {
+      "id": "pugliese",
+      "name": "Osvaldo Pugliese",
+      "nickname": "San Pugliese",
+      "profiles": [
+        {
+          "era": "1943-1960",
+          "style": "dramatic",
+          "energy": 8,
+          "mood": "dramatic",
+          "danceability": 7,
+          "complexity": 8,
+          "dj_notes": "Dramatic pauses, yumba beat. Divides the floor — advanced dancers love it, beginners sit down. Place strategically mid-to-late evening."
+        }
+      ]
+    },
+    {
+      "id": "biagi",
+      "name": "Rodolfo Biagi",
+      "nickname": "Manos Brujas",
+      "profiles": [
+        {
+          "era": "1938-1950",
+          "style": "harder_rhythmic",
+          "energy": 8,
+          "mood": "driving-syncopated",
+          "danceability": 8,
+          "complexity": 6,
+          "key_singers": ["Jorge Ortiz", "Alberto Amor"],
+          "dj_notes": "Striking syncopation with gaps. Hugely popular with milonguero-style dancers."
+        }
+      ]
+    },
+    {
+      "id": "tanturi",
+      "name": "Ricardo Tanturi",
+      "profiles": [
+        {
+          "era": "1940-1944",
+          "style": "softer_rhythmic",
+          "energy": 7,
+          "mood": "energetic-fun",
+          "danceability": 9,
+          "complexity": 4,
+          "key_singers": ["Alberto Castillo"],
+          "dj_notes": "Fun, accessible. Castillo is theatrical, energetic. Good mid-evening builder."
+        },
+        {
+          "era": "1943-1945",
+          "style": "softer_rhythmic",
+          "energy": 5,
+          "mood": "romantic",
+          "danceability": 8,
+          "complexity": 4,
+          "key_singers": ["Enrique Campos"],
+          "dj_notes": "Gentle, romantic. Very different from Castillo tandas."
+        }
+      ]
+    },
+    {
+      "id": "calo",
+      "name": "Miguel Caló",
+      "profiles": [
+        {
+          "era": "1942-1945",
+          "style": "lyrical",
+          "energy": 5,
+          "mood": "romantic",
+          "danceability": 8,
+          "complexity": 5,
+          "key_singers": ["Raúl Berón", "Alberto Podestá", "Raúl Iriarte"],
+          "dj_notes": "Romantic with great singers. Bring energy DOWN while keeping emotion UP."
+        }
+      ]
+    },
+    {
+      "id": "dagostino",
+      "name": "Ángel D'Agostino",
+      "profiles": [
+        {
+          "era": "1940-1945",
+          "style": "softer_rhythmic",
+          "energy": 5,
+          "mood": "ethereal",
+          "danceability": 8,
+          "complexity": 3,
+          "key_singers": ["Ángel Vargas"],
+          "dj_notes": "Ethereal, spacious, dreamy. Good after a high-energy block."
+        }
+      ]
+    },
+    {
+      "id": "laurenz",
+      "name": "Pedro Laurenz",
+      "profiles": [
+        {
+          "era": "1937-1945",
+          "style": "softer_rhythmic",
+          "energy": 6,
+          "mood": "intense-rhythmic",
+          "danceability": 8,
+          "complexity": 5,
+          "key_singers": ["Alberto Podestá"],
+          "dj_notes": "Bandoneón-driven softer rhythm. Milonguero favorite."
+        }
+      ]
+    },
+    {
+      "id": "canaro",
+      "name": "Francisco Canaro",
+      "nickname": "Pirincho",
+      "profiles": [
+        {
+          "era": "1927-1950",
+          "style": "old_guard",
+          "energy": 4,
+          "mood": "simple-rhythmic",
+          "danceability": 7,
+          "complexity": 2,
+          "dj_notes": "Simple, clear rhythms. Slowest milongas — most frequently played. Good warm-up."
+        }
+      ]
+    },
+    {
+      "id": "de_angelis",
+      "name": "Alfredo De Angelis",
+      "profiles": [
+        {
+          "era": "1943-1958",
+          "style": "dramatic",
+          "energy": 6,
+          "mood": "smooth-dramatic",
+          "danceability": 8,
+          "complexity": 5,
+          "key_singers": ["Carlos Dante", "Julio Martel"],
+          "dj_notes": "Between Di Sarli smoothness and Pugliese drama. Good for bridging energy levels."
+        }
+      ]
+    },
+    {
+      "id": "donato",
+      "name": "Edgardo Donato",
+      "profiles": [
+        {
+          "era": "1932-1942",
+          "style": "softer_rhythmic",
+          "energy": 6,
+          "mood": "punchy-fun",
+          "danceability": 8,
+          "complexity": 3,
+          "dj_notes": "More punch than Canaro. Fun, accessible. Good warm-up or maintenance."
+        }
+      ]
+    },
+    {
+      "id": "demare",
+      "name": "Lucio Demare",
+      "profiles": [
+        {
+          "era": "1942-1948",
+          "style": "lyrical",
+          "energy": 4,
+          "mood": "romantic-gentle",
+          "danceability": 8,
+          "complexity": 4,
+          "key_singers": ["Raúl Berón"],
+          "dj_notes": "Gentle, romantic, clear rhythms. Good for warm-up or cool-down."
+        }
+      ]
+    },
+    {
+      "id": "fresedo",
+      "name": "Osvaldo Fresedo",
+      "profiles": [
+        {
+          "era": "1935-1955",
+          "style": "smooth",
+          "energy": 4,
+          "mood": "pink-champagne",
+          "danceability": 7,
+          "complexity": 3,
+          "key_singers": ["Roberto Ray"],
+          "dj_notes": "'Pink Champagne' tango — sweet, light, romantic. Good for early evening."
+        }
+      ]
+    },
+    {
+      "id": "rodriguez",
+      "name": "Enrique Rodríguez",
+      "profiles": [
+        {
+          "era": "1938-1950",
+          "style": "harder_rhythmic",
+          "energy": 7,
+          "mood": "rhythmic-accessible",
+          "danceability": 9,
+          "complexity": 3,
+          "key_singers": ["Roberto Flores", "Armando Moreno"],
+          "dj_notes": "Accessible harder rhythm. Clear, simple. Good warm-up, reliable floor-filler."
+        }
+      ]
+    },
+    {
+      "id": "color_tango",
+      "name": "Color Tango",
+      "profiles": [
+        {
+          "era": "1989-present",
+          "style": "modern_dance",
+          "energy": 7,
+          "mood": "neo-pugliese",
+          "danceability": 8,
+          "complexity": 6,
+          "dj_notes": "Modern Pugliese-inspired sound with better audio quality."
+        }
+      ]
+    },
+    {
+      "id": "sexteto_milonguero",
+      "name": "Sexteto Milonguero",
+      "profiles": [
+        {
+          "era": "2006-2020",
+          "style": "modern_dance",
+          "energy": 8,
+          "mood": "energetic-fresh",
+          "danceability": 9,
+          "complexity": 4,
+          "dj_notes": "Hottest modern tango orchestra. Fresh energy, crowd-pleaser."
+        }
+      ]
+    },
+    {
+      "id": "otros_aires",
+      "name": "Otros Aires",
+      "profiles": [
+        {
+          "era": "2003-present",
+          "style": "neo_tango",
+          "energy": 6,
+          "mood": "electronic-tango",
+          "danceability": 7,
+          "complexity": 4,
+          "dj_notes": "Electro-tango fusion. Max 1 tanda per evening at traditional milongas."
+        }
+      ]
+    }
+  ],
+
+  "type_modifiers": {
+    "tango": { "energy_modifier": 0, "notes": "Baseline. 4/4 time." },
+    "vals": { "energy_modifier": -1.0, "notes": "3/4 waltz. Lighter, romantic. Breathing room." },
+    "milonga": { "energy_modifier": 1.5, "notes": "2/4 time. Fastest, most playful. Energy peak." }
+  },
+
+  "placement_guidelines": {
+    "warm_up": {
+      "position": "First 2-3 tandas",
+      "recommended": ["canaro", "di_sarli", "rodriguez", "donato", "demare", "fresedo"],
+      "energy_range": [3, 5],
+      "notes": "Clear, simple rhythms. Help dancers find the beat."
+    },
+    "building": {
+      "position": "Tandas 3-6",
+      "recommended": ["darienzo", "tanturi", "dagostino", "laurenz", "calo"],
+      "energy_range": [5, 7]
+    },
+    "peak": {
+      "position": "Mid-evening",
+      "recommended": ["darienzo", "biagi", "pugliese", "troilo"],
+      "energy_range": [7, 9]
+    },
+    "cool_down": {
+      "position": "After peak",
+      "recommended": ["di_sarli", "calo", "dagostino", "demare", "fresedo"],
+      "energy_range": [4, 6]
+    },
+    "wind_down": {
+      "position": "Last 2-3 tandas",
+      "recommended": ["di_sarli", "canaro", "fresedo"],
+      "energy_range": [3, 5]
+    }
+  }
+}
+
+## PAGES & FEATURES
+
+### Page 1: HOME / MY SETS
+- List of saved milonga sets with date, name, venue, tanda count
+- "New Set" button → opens the planner
+- Each set shows a mini energy curve preview (sparkline)
+
+### Page 2: SET PLANNER (the core feature)
+This is where DJs spend 95% of their time. Layout:
+
+**Left sidebar: Tanda Library**
+- Shows available tanda "cards" grouped by orchestra
+- Each card shows: Orchestra name, era, singer, type (tango/vals/milonga), energy score (1-10), style category
+- Filter by: type (tango/vals/milonga), style (rhythmic/lyrical/dramatic/smooth), energy range (slider), era
+- Search by orchestra name
+- Cards are color-coded by type: red=tango, blue=vals, green=milonga
+- Energy shown as a colored bar (green→yellow→orange→red from 1→10)
+
+**Creating a tanda card:**
+- User clicks "+" or "Create Tanda" button
+- Selects: orchestra (dropdown with search), singer (auto-populated from DB), type (tango/vals/milonga), number of tracks (3 or 4)
+- Energy auto-calculated from DB but user can override
+- Created tanda appears in the library
+
+**Center: Timeline**
+- Horizontal scrollable timeline with slots
+- Default: 14 slots (typical 3.5-hour milonga)
+- User can add/remove slots
+- Each slot shows: position number, type badge, orchestra name, singer, energy bar
+- Drag & drop tandas from library INTO slots
+- Drag & drop to REORDER within timeline
+- Click slot to edit or remove
+- Between slots, show thin "cortina" dividers
+- Show cumulative time (start time configurable, default 21:00)
+- Empty slots shown as dashed outlines with "Drop tanda here"
+
+**Top: Energy Curve Visualization**
+- Smooth bezier curve drawn across the timeline
+- Y-axis: energy 1-10
+- X-axis: tanda position
+- Points colored by tanda type (red/blue/green)
+- Gradient fill under curve (gold gradient)
+- Shows the "arc" of the evening at a glance
+- Updates in real-time as tandas are added/moved
+
+**Bottom: Smart Warnings Bar**
+- Real-time validation warnings:
+  - "⚠ Same orchestra back-to-back (slots 3-4)" 
+  - "⚠ 3 consecutive tangos — add a vals or milonga"
+  - "⚠ No vals in first 6 tandas — dancers need variety"
+  - "⚠ Energy jumps from 3 to 9 — consider a transition"
+  - "⚠ Pugliese too early — save for mid-evening when floor is warm"
+  - "💡 Consider Di Sarli or Canaro for warm-up" (contextual suggestions)
+- Warnings are yellow chips, suggestions are blue chips
+- Dismissable
+
+**Right sidebar: Set Info & Stats**
+- Set name (editable)
+- Venue (optional)
+- Date
+- Start time (editable, default 21:00)
+- Total tandas / estimated duration
+- Average energy
+- Style distribution pie chart (% rhythmic, lyrical, dramatic, smooth)
+- Type distribution (% tango, vals, milonga) — should be roughly 60% tango, 20% vals, 20% milonga
+- Orchestra variety score (how many unique orchestras)
+
+**TTVTTM Pattern Helper:**
+- Optional toggle: "Show TTVTTM guide"
+- When on, the timeline slots show faded labels: T, T, V, T, T, M, T, T, V, T, T, M, T, T
+- Slots glow yellow if the tanda type doesn't match the pattern
+- This is a GUIDE, not enforcement — DJs can break the pattern
+
+### Page 3: ORCHESTRA REFERENCE
+- Browsable database of all orchestras
+- Each orchestra card shows: name, nickname, era range, style, energy range, mood tags, key singers, DJ notes
+- Filter by style, era, energy
+- Clicking an orchestra shows full profile with all era-specific entries
+- "Quick add tanda" button on each profile
+
+## SMART WARNINGS LOGIC (important business rules)
+
+```
+Rules to implement:
+1. NEVER same orchestra in consecutive tandas
+2. NEVER 3+ consecutive tandas of same type (tango/vals/milonga)
+3. WARN if no vals in first 8 slots
+4. WARN if no milonga in first 10 slots
+5. WARN if energy jumps more than 4 points between adjacent tandas
+6. WARN if Pugliese/Biagi is in first 3 slots (too complex for warm-up)
+7. SUGGEST warm-up orchestras for first 2 slots if they're empty
+8. SUGGEST La Cumparsita reminder for last slot
+9. WARN if total tango% < 50% or > 75%
+10. WARN if any orchestra appears more than 3 times total
+```
+
+## ENERGY CALCULATION
+
+When creating a tanda:
+- Base energy comes from orchestra profile in DB
+- Type modifier applied: vals = base - 1, milonga = base + 1.5, tango = base
+- Singer can modify: user can adjust ±1 from calculated
+- Final energy clamped to 1-10
+
+## EXPORT OPTIONS
+- Export as text file (formatted list with cortinas marked)
+- Export as JSON (for future integrations)
+- Print-friendly view (single page summary with energy curve)
+
+## RESPONSIVE BEHAVIOR
+- Desktop: full 3-column layout (library | timeline | stats)
+- Tablet: library collapses to overlay panel, timeline + stats
+- Mobile: NOT a priority for Phase 1 (DJs plan on laptops)
+
+## WHAT IS EXPLICITLY NOT IN PHASE 1
+- No user accounts or authentication
+- No music playback or audio
+- No Spotify/Apple Music integration
+- No AI-generated suggestions (just rule-based warnings)
+- No real-time collaboration
+- No mobile app
+- No community features
+- No music file management
+
+## SAMPLE DATA
+Pre-load 2 example sets so the app doesn't feel empty:
+1. "Classic Saturday Milonga" — 14 tandas, traditional TTVTTM, smooth energy arc
+2. "Short Practica" — 8 tandas, more experimental, includes one neo-tango tanda
+```
