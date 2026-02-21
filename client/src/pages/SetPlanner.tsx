@@ -243,6 +243,7 @@ export default function SetPlanner() {
 
   const handlePrint = () => {
     if (!set) return;
+    const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     const typeLabel = (tp: string) => tp === "tango" ? "T" : tp === "vals" ? "V" : "M";
     const typeColor = (tp: string) => tp === "tango" ? "#c94c4c" : tp === "vals" ? "#4c8ec9" : "#4cc96a";
 
@@ -259,10 +260,10 @@ export default function SetPlanner() {
         return `<tr>
           <td>${i + 1}</td>
           <td><span class="type-badge" style="background:${typeColor(td.type)}">${typeLabel(td.type)}${isMixed ? " MIX" : ""}</span></td>
-          <td><strong>${orchName}</strong>${td.singer ? ` <span style="color:#888">(${td.singer})</span>` : ""}</td>
+          <td><strong>${esc(orchName)}</strong>${td.singer ? ` <span style="color:#888">(${esc(td.singer)})</span>` : ""}</td>
           <td class="num">${td.energy.toFixed(1)}</td>
           <td class="num">${td.trackCount}</td>
-          <td style="color:#888;font-size:11px">${td.style ? getStyleLabel(td.style) : ""}</td>
+          <td style="color:#888;font-size:11px">${td.style ? esc(getStyleLabel(td.style)) : ""}</td>
         </tr>`;
       })
       .join("\n");
@@ -293,7 +294,7 @@ export default function SetPlanner() {
       </svg>`;
     }
 
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${set.name}</title>
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(set.name)}</title>
     <style>
       body{font-family:-apple-system,sans-serif;max-width:800px;margin:0 auto;padding:24px;color:#222}
       h1{font-family:Georgia,serif;margin:0 0 4px}
@@ -306,8 +307,8 @@ export default function SetPlanner() {
       tr.empty td{background:#fafafa}
       @media print{body{padding:0}table{page-break-inside:auto}tr{page-break-inside:avoid}}
     </style></head><body>
-    <h1>${set.name}</h1>
-    <div class="meta">${set.date}${set.venue ? ` — ${set.venue}` : ""} — ${t("start_time")}: ${set.startTime}</div>
+    <h1>${esc(set.name)}</h1>
+    <div class="meta">${esc(set.date)}${set.venue ? ` — ${esc(set.venue)}` : ""} — ${t("start_time")}: ${esc(set.startTime)}</div>
     ${sparkSvg}
     <table><thead><tr><th>#</th><th>${t("type")}</th><th>${t("orchestra")}</th><th>${t("energy")}</th><th>${t("tracks")}</th><th>${t("style_distribution")}</th></tr></thead>
     <tbody>${rows}</tbody></table>

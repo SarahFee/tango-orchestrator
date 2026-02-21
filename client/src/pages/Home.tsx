@@ -140,7 +140,10 @@ export default function Home() {
   );
 }
 
+let sparkId = 0;
+
 function EnergySparkline({ tandas }: { tandas: Tanda[] }) {
+  const [gradientId] = useState(() => `spark-fill-${++sparkId}`);
   const sorted = tandas
     .filter((t) => t.position !== null)
     .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
@@ -173,12 +176,12 @@ function EnergySparkline({ tandas }: { tandas: Tanda[] }) {
   return (
     <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-7" preserveAspectRatio="xMidYMid meet" data-testid="sparkline">
       <defs>
-        <linearGradient id={`spark-fill`} x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#c9a84c" stopOpacity="0.35" />
           <stop offset="100%" stopColor="#c9a84c" stopOpacity="0.05" />
         </linearGradient>
       </defs>
-      <path d={fillD} fill="url(#spark-fill)" />
+      <path d={fillD} fill={`url(#${gradientId})`} />
       <path d={d} fill="none" stroke="#c9a84c" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   );
