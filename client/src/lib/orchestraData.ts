@@ -588,6 +588,26 @@ export function getStyleLabel(style: string): string {
   return style.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
 }
 
+export function getEraBracket(era: string): string {
+  if (!era) return "unknown";
+  const match = era.match(/(\d{4})/);
+  if (!match) return "unknown";
+  const startYear = parseInt(match[1]);
+  if (startYear < 1935) return "pre_golden";
+  if (startYear < 1945) return "golden_early";
+  if (startYear < 1960) return "golden_late";
+  if (startYear < 1990) return "post_golden";
+  return "modern";
+}
+
+export function sameEraBracket(era1: string, era2: string): boolean {
+  return getEraBracket(era1) === getEraBracket(era2);
+}
+
+export function sameStyleCategory(style1: string, style2: string): boolean {
+  return style1 === style2;
+}
+
 export const TTVTTM_PATTERN = ["T", "T", "V", "T", "T", "M"];
 
 export function getTTVTTMLabel(position: number): string {

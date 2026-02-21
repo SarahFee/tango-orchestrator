@@ -7,10 +7,14 @@ export interface MilongaSet {
   createdAt: string;
 }
 
+export type TandaMode = "standard" | "mixed";
+
 export interface Tanda {
   id: string;
   setId: string;
   orchestraId: string;
+  orchestraIds?: string[];
+  tandaMode?: TandaMode;
   singer: string | null;
   type: string;
   trackCount: number;
