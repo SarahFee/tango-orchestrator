@@ -3,6 +3,7 @@ import { getOrchestra, getStyleLabel } from "@/lib/orchestraData";
 import { EnergyBar } from "./EnergyBar";
 import { TypeBadge } from "./TypeBadge";
 import { GripVertical, X } from "lucide-react";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface TandaCardProps {
   tanda: Tanda;
@@ -23,6 +24,7 @@ export function TandaCard({
   compact = false,
   className = "",
 }: TandaCardProps) {
+  const { t } = useLanguage();
   const orchestra = getOrchestra(tanda.orchestraId);
   const name = orchestra?.name || tanda.orchestraId;
 
@@ -45,7 +47,7 @@ export function TandaCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 mb-1">
             <TypeBadge type={tanda.type as TandaType} size="sm" />
-            <span className="text-xs text-muted-foreground">{tanda.trackCount} tracks</span>
+            <span className="text-xs text-muted-foreground">{tanda.trackCount} {t("tracks").toLowerCase()}</span>
           </div>
           <p className={`font-serif font-semibold truncate ${compact ? "text-xs" : "text-sm"}`}>
             {name}

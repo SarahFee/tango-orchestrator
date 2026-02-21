@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Warning } from "@/lib/warnings";
 import { AlertTriangle, Lightbulb, X } from "lucide-react";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface WarningsBarProps {
   warnings: Warning[];
@@ -9,6 +10,7 @@ interface WarningsBarProps {
 
 export function WarningsBar({ warnings, className = "" }: WarningsBarProps) {
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+  const { t } = useLanguage();
 
   const visible = warnings.filter((w) => !dismissed.has(w.id));
 
@@ -31,7 +33,7 @@ export function WarningsBar({ warnings, className = "" }: WarningsBarProps) {
           ) : (
             <Lightbulb className="w-3 h-3 flex-shrink-0" />
           )}
-          <span>{w.message}</span>
+          <span>{t(w.messageKey, w.messageParams)}</span>
           <button
             onClick={() => setDismissed((prev) => new Set(prev).add(w.id))}
             className="ml-0.5 opacity-60 hover:opacity-100 transition-opacity"

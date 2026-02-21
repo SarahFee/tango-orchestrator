@@ -28,6 +28,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/useLanguage";
 import {
   ArrowLeft,
   Plus,
@@ -45,6 +46,7 @@ export default function SetPlanner() {
   const params = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const setId = params.id;
 
   const [set, setSet] = useState<MilongaSet | undefined>(() => storage.getSet(setId));
@@ -194,18 +196,18 @@ export default function SetPlanner() {
   const handleExportText = () => {
     if (!set) return;
     let text = `${set.name}\n`;
-    if (set.venue) text += `Venue: ${set.venue}\n`;
-    text += `Date: ${set.date} | Start: ${set.startTime}\n\n`;
+    if (set.venue) text += `${t("export_venue")}: ${set.venue}\n`;
+    text += `${t("export_date")}: ${set.date} | ${t("export_start")}: ${set.startTime}\n\n`;
 
-    timelineTandas.forEach((t, i) => {
+    timelineTandas.forEach((td, i) => {
       if (i > 0) text += "--- CORTINA ---\n";
-      if (t) {
-        const orch = getOrchestra(t.orchestraId);
-        text += `${i + 1}. [${t.type.toUpperCase()}] ${orch?.name || t.orchestraId}`;
-        if (t.singer) text += ` (${t.singer})`;
-        text += ` | Energy: ${t.energy.toFixed(1)} | ${t.trackCount} tracks\n`;
+      if (td) {
+        const orch = getOrchestra(td.orchestraId);
+        text += `${i + 1}. [${td.type.toUpperCase()}] ${orch?.name || td.orchestraId}`;
+        if (td.singer) text += ` (${td.singer})`;
+        text += ` | ${t("energy")}: ${td.energy.toFixed(1)} | ${td.trackCount} ${t("tracks").toLowerCase()}\n`;
       } else {
-        text += `${i + 1}. [EMPTY SLOT]\n`;
+        text += `${i + 1}. [${t("export_empty_slot")}]\n`;
       }
     });
 
@@ -244,13 +246,13 @@ export default function SetPlanner() {
           const data = JSON.parse(ev.target?.result as string);
           if (data.set && data.tandas) {
             const imported = storage.importSet(data);
-            toast({ title: "Set imported", description: `"${imported.name}" added.` });
+            toast({ title: t("set_imported"), description: `"${imported.name}" ${t("set_imported_desc")}` });
             navigate(`/planner/${imported.id}`);
           } else {
             throw new Error("Invalid format");
           }
         } catch {
-          toast({ title: "Import failed", description: "Invalid set file.", variant: "destructive" });
+          toast({ title: t("import_failed"), description: t("invalid_set_file"), variant: "destructive" });
         }
       };
       reader.readAsText(file);
@@ -268,9 +270,9 @@ export default function SetPlanner() {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
-          <p className="text-muted-foreground mb-4">Set not found</p>
+          <p className="text-muted-foreground mb-4">{t("set_not_found")}</p>
           <Button variant="secondary" onClick={() => navigate("/")}>
-            Go Home
+            {t("go_home")}
           </Button>
         </div>
       </div>
@@ -285,17 +287,16 @@ export default function SetPlanner() {
       onDragEnd={handleDragEnd}
     >
       <div className="flex h-full" data-testid="set-planner">
-        {/* LEFT: Tanda Library */}
         <div className="w-64 flex-shrink-0 border-r border-border/30 flex flex-col bg-card/30">
           <div className="p-3 border-b border-border/30">
             <div className="flex items-center justify-between mb-2">
-              <h2 className="font-serif text-sm font-semibold">Tanda Library</h2>
+              <h2 className="font-serif text-sm font-semibold">{t("tanda_library")}</h2>
               <CreateTandaDialog onCreateTanda={handleCreateTanda} />
             </div>
             <div className="relative mb-2">
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
               <Input
-                placeholder="Search..."
+                placeholder={t("search")}
                 value={librarySearch}
                 onChange={(e) => setLibrarySearch(e.target.value)}
                 className="pl-8 h-8 text-xs"
@@ -303,18 +304,18 @@ export default function SetPlanner() {
               />
             </div>
             <div className="flex gap-1.5 mb-2">
-              {(["all", "tango", "vals", "milonga"] as const).map((t) => (
+              {(["all", "tango", "vals", "milonga"] as const).map((tp) => (
                 <button
-                  key={t}
-                  onClick={() => setTypeFilter(t)}
+                  key={tp}
+                  onClick={() => setTypeFilter(tp)}
                   className={`text-[10px] px-1.5 py-0.5 rounded capitalize font-medium transition-all ${
-                    typeFilter === t
+                    typeFilter === tp
                       ? "bg-primary/20 text-primary"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
-                  data-testid={`button-filter-type-${t}`}
+                  data-testid={`button-filter-type-${tp}`}
                 >
-                  {t === "all" ? "All" : t}
+                  {tp === "all" ? t("all") : tp}
                 </button>
               ))}
             </div>
@@ -326,8 +327,8 @@ export default function SetPlanner() {
                 <div className="text-center py-8">
                   <p className="text-xs text-muted-foreground/60 italic">
                     {libraryTandas.length === 0
-                      ? "Create your first tanda"
-                      : "No tandas match filters"}
+                      ? t("create_first_tanda")
+                      : t("no_tandas_match")}
                   </p>
                 </div>
               ) : (
@@ -339,9 +340,7 @@ export default function SetPlanner() {
           </ScrollArea>
         </div>
 
-        {/* CENTER: Timeline */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          {/* Header */}
           <div className="flex items-center gap-3 p-3 border-b border-border/30">
             <Button variant="ghost" size="icon" onClick={() => navigate("/")} data-testid="button-back-home">
               <ArrowLeft className="w-4 h-4" />
@@ -380,24 +379,22 @@ export default function SetPlanner() {
                   <Plus className="w-3 h-3" />
                 </Button>
               </div>
-              <Button variant="ghost" size="icon" onClick={handleImportSet} title="Import set" data-testid="button-import-set">
+              <Button variant="ghost" size="icon" onClick={handleImportSet} title={t("import_set")} data-testid="button-import-set">
                 <Upload className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="icon" onClick={handleExportText} title="Export as text" data-testid="button-export-text">
+              <Button variant="ghost" size="icon" onClick={handleExportText} title={t("export_text")} data-testid="button-export-text">
                 <FileText className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="icon" onClick={handleExportJSON} title="Export as JSON" data-testid="button-export-json">
+              <Button variant="ghost" size="icon" onClick={handleExportJSON} title={t("export_json")} data-testid="button-export-json">
                 <FileJson className="w-4 h-4" />
               </Button>
             </div>
           </div>
 
-          {/* Energy Curve */}
           <div className="h-32 border-b border-border/30 px-4 py-2 flex-shrink-0">
             <EnergyCurve tandas={timelineTandas} className="h-full" />
           </div>
 
-          {/* Timeline */}
           <ScrollArea className="flex-1">
             <div className="p-4 space-y-0">
               <SortableContext
@@ -422,7 +419,6 @@ export default function SetPlanner() {
             </div>
           </ScrollArea>
 
-          {/* Warnings */}
           {warnings.length > 0 && (
             <div className="border-t border-border/30 p-3 flex-shrink-0">
               <WarningsBar warnings={warnings} />
@@ -430,7 +426,6 @@ export default function SetPlanner() {
           )}
         </div>
 
-        {/* RIGHT: Stats */}
         <div className="w-64 flex-shrink-0 border-l border-border/30 bg-card/30">
           <ScrollArea className="h-full">
             <SetStats

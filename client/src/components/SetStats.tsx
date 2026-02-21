@@ -1,6 +1,7 @@
 import type { Tanda, MilongaSet } from "@shared/schema";
 import { getOrchestra, getStyleLabel } from "@/lib/orchestraData";
 import { TANGO_COLORS, STYLE_COLORS } from "@/lib/tangoColors";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface SetStatsProps {
   set: MilongaSet;
@@ -9,6 +10,7 @@ interface SetStatsProps {
 }
 
 export function SetStats({ set, tandas, onUpdateSet }: SetStatsProps) {
+  const { t } = useLanguage();
   const filledTandas = tandas.filter((t): t is Tanda => t !== null);
   const totalTandas = filledTandas.length;
   const avgEnergy = totalTandas > 0
@@ -37,7 +39,7 @@ export function SetStats({ set, tandas, onUpdateSet }: SetStatsProps) {
   return (
     <div className="space-y-4 p-3" data-testid="set-stats">
       <div>
-        <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Set Name</label>
+        <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{t("set_name")}</label>
         <input
           value={set.name}
           onChange={(e) => onUpdateSet?.({ name: e.target.value })}
@@ -47,11 +49,11 @@ export function SetStats({ set, tandas, onUpdateSet }: SetStatsProps) {
       </div>
 
       <div>
-        <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Venue</label>
+        <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{t("venue")}</label>
         <input
           value={set.venue || ""}
           onChange={(e) => onUpdateSet?.({ venue: e.target.value })}
-          placeholder="Optional"
+          placeholder={t("optional")}
           className="w-full bg-transparent border-b border-border/30 focus:border-primary/50 outline-none text-sm py-1 transition-colors"
           data-testid="input-venue"
         />
@@ -59,7 +61,7 @@ export function SetStats({ set, tandas, onUpdateSet }: SetStatsProps) {
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Date</label>
+          <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{t("date")}</label>
           <input
             type="date"
             value={set.date}
@@ -69,7 +71,7 @@ export function SetStats({ set, tandas, onUpdateSet }: SetStatsProps) {
           />
         </div>
         <div>
-          <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Start Time</label>
+          <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{t("start_time")}</label>
           <input
             type="time"
             value={set.startTime}
@@ -83,35 +85,35 @@ export function SetStats({ set, tandas, onUpdateSet }: SetStatsProps) {
       <div className="border-t border-border/30 pt-3">
         <div className="grid grid-cols-2 gap-y-2.5 text-sm">
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Tandas</p>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{t("tandas")}</p>
             <p className="font-serif font-semibold text-lg tabular-nums" data-testid="text-total-tandas">{totalTandas}/{tandas.length}</p>
           </div>
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Duration</p>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{t("duration")}</p>
             <p className="font-serif font-semibold text-lg tabular-nums" data-testid="text-duration">
               {hours > 0 ? `${hours}h ${mins}m` : `${mins}m`}
             </p>
           </div>
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Avg Energy</p>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{t("avg_energy")}</p>
             <p className="font-serif font-semibold text-lg tabular-nums" data-testid="text-avg-energy">{avgEnergy.toFixed(1)}</p>
           </div>
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Orchestras</p>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{t("orchestras")}</p>
             <p className="font-serif font-semibold text-lg tabular-nums" data-testid="text-unique-orchestras">{uniqueOrchestras}</p>
           </div>
         </div>
       </div>
 
       <div className="border-t border-border/30 pt-3">
-        <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">Type Distribution</p>
+        <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">{t("type_distribution")}</p>
         <div className="space-y-1.5">
-          {(Object.entries(typeCounts) as [string, number][]).map(([t, count]) => {
+          {(Object.entries(typeCounts) as [string, number][]).map(([tp, count]) => {
             const percent = totalTandas > 0 ? (count / totalTandas) * 100 : 0;
-            const config = TANGO_COLORS[t as keyof typeof TANGO_COLORS];
+            const config = TANGO_COLORS[tp as keyof typeof TANGO_COLORS];
             return (
-              <div key={t} className="flex items-center gap-2">
-                <span className="text-xs w-14 capitalize">{config?.label || t}</span>
+              <div key={tp} className="flex items-center gap-2">
+                <span className="text-xs w-14 capitalize">{config?.label || tp}</span>
                 <div className="flex-1 h-2 rounded-full bg-black/20 dark:bg-white/10 overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-500"
@@ -129,7 +131,7 @@ export function SetStats({ set, tandas, onUpdateSet }: SetStatsProps) {
 
       {Object.keys(styleCounts).length > 0 && (
         <div className="border-t border-border/30 pt-3">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">Style Distribution</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">{t("style_distribution")}</p>
           <div className="space-y-1.5">
             {Object.entries(styleCounts)
               .sort(([, a], [, b]) => b - a)

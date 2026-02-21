@@ -71,7 +71,19 @@ build.js                   - Static build script
 - Build: `node build.js` (outputs static files to dist/public/)
 - The build output can be deployed to any static hosting
 
+### Internationalization (i18n)
+- 3 languages supported: English (default), French, Spanish
+- Language toggle (EN | FR | ES) in the top-right header
+- Selected language stored in localStorage (`tangoflow_language`)
+- All UI strings centralized in `client/src/lib/translations.ts` as key-value objects
+- Language context/hook: `client/src/hooks/useLanguage.tsx` (LanguageProvider + useLanguage hook)
+- `t("key")` function with optional param interpolation: `t("warning_back_to_back", { name: "Di Sarli", from: 1, to: 2 })`
+- Tango-specific terms stay untranslated: tanda, cortina, vals, milonga, La Cumparsita, orchestra names, singer names
+- Google Sheet data is NOT translated — stays in original language
+- Warnings system uses translation keys + params (not hardcoded strings)
+
 ## Recent Changes (Feb 2026)
+- Added i18n with EN/FR/ES language support and localStorage persistence
 - Architecture change: Converted from Express+PostgreSQL to fully static SPA
 - Removed all backend dependencies (database, API routes, server storage)
 - Added localStorage-based persistence

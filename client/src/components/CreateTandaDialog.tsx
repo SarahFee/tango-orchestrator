@@ -11,6 +11,7 @@ import { Plus } from "lucide-react";
 import { TypeBadge } from "./TypeBadge";
 import { EnergyBar } from "./EnergyBar";
 import type { TandaType } from "@shared/schema";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface CreateTandaDialogProps {
   onCreateTanda: (tanda: {
@@ -26,6 +27,7 @@ interface CreateTandaDialogProps {
 }
 
 export function CreateTandaDialog({ onCreateTanda, trigger }: CreateTandaDialogProps) {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const [orchestraId, setOrchestraId] = useState("");
   const [singer, setSinger] = useState("");
@@ -78,19 +80,19 @@ export function CreateTandaDialog({ onCreateTanda, trigger }: CreateTandaDialogP
         {trigger || (
           <Button size="sm" data-testid="button-create-tanda">
             <Plus className="w-4 h-4 mr-1" />
-            Create Tanda
+            {t("create_tanda")}
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md" data-testid="dialog-create-tanda">
         <DialogHeader>
-          <DialogTitle className="font-serif">Create New Tanda</DialogTitle>
+          <DialogTitle className="font-serif">{t("create_new_tanda")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 pt-2">
           <div>
-            <Label className="text-xs text-muted-foreground mb-1.5 block">Orchestra</Label>
+            <Label className="text-xs text-muted-foreground mb-1.5 block">{t("orchestra")}</Label>
             <Input
-              placeholder="Search orchestras..."
+              placeholder={t("search_orchestras")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="mb-2"
@@ -125,27 +127,27 @@ export function CreateTandaDialog({ onCreateTanda, trigger }: CreateTandaDialogP
             <>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs text-muted-foreground mb-1.5 block">Type</Label>
+                  <Label className="text-xs text-muted-foreground mb-1.5 block">{t("type")}</Label>
                   <div className="flex gap-1.5">
-                    {(["tango", "vals", "milonga"] as TandaType[]).map((t) => (
+                    {(["tango", "vals", "milonga"] as TandaType[]).map((tp) => (
                       <button
-                        key={t}
+                        key={tp}
                         onClick={() => {
-                          setType(t);
+                          setType(tp);
                           setEnergyOverride(null);
                         }}
                         className={`flex-1 py-1.5 rounded-md text-xs font-medium transition-all ${
-                          type === t ? "ring-1 ring-ring" : "opacity-60"
+                          type === tp ? "ring-1 ring-ring" : "opacity-60"
                         }`}
-                        data-testid={`button-type-${t}`}
+                        data-testid={`button-type-${tp}`}
                       >
-                        <TypeBadge type={t} size="sm" />
+                        <TypeBadge type={tp} size="sm" />
                       </button>
                     ))}
                   </div>
                 </div>
                 <div>
-                  <Label className="text-xs text-muted-foreground mb-1.5 block">Tracks</Label>
+                  <Label className="text-xs text-muted-foreground mb-1.5 block">{t("tracks")}</Label>
                   <div className="flex gap-1.5">
                     {[3, 4].map((n) => (
                       <button
@@ -167,13 +169,13 @@ export function CreateTandaDialog({ onCreateTanda, trigger }: CreateTandaDialogP
 
               {singers.length > 0 && (
                 <div>
-                  <Label className="text-xs text-muted-foreground mb-1.5 block">Singer (optional)</Label>
+                  <Label className="text-xs text-muted-foreground mb-1.5 block">{t("singer_optional")}</Label>
                   <Select value={singer} onValueChange={setSinger}>
                     <SelectTrigger data-testid="select-singer">
-                      <SelectValue placeholder="Instrumental" />
+                      <SelectValue placeholder={t("instrumental")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="instrumental">Instrumental</SelectItem>
+                      <SelectItem value="instrumental">{t("instrumental")}</SelectItem>
                       {singers.map((s) => (
                         <SelectItem key={s} value={s}>
                           {s}
@@ -186,10 +188,10 @@ export function CreateTandaDialog({ onCreateTanda, trigger }: CreateTandaDialogP
 
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <Label className="text-xs text-muted-foreground">Energy</Label>
+                  <Label className="text-xs text-muted-foreground">{t("energy")}</Label>
                   <span className="text-xs text-muted-foreground">
-                    Base: {calculatedEnergy.toFixed(1)}
-                    {energyOverride !== null && ` | Override: ${energyOverride.toFixed(1)}`}
+                    {t("base")}: {calculatedEnergy.toFixed(1)}
+                    {energyOverride !== null && ` | ${t("override")}: ${energyOverride.toFixed(1)}`}
                   </span>
                 </div>
                 <EnergyBar energy={finalEnergy} size="md" />
@@ -217,7 +219,7 @@ export function CreateTandaDialog({ onCreateTanda, trigger }: CreateTandaDialogP
             className="w-full"
             data-testid="button-submit-tanda"
           >
-            Add Tanda
+            {t("add_tanda")}
           </Button>
         </div>
       </DialogContent>

@@ -4,7 +4,8 @@ import { getOrchestra, placementGuidelines } from "./orchestraData";
 export interface Warning {
   id: string;
   type: "warning" | "suggestion";
-  message: string;
+  messageKey: string;
+  messageParams: Record<string, string | number>;
   slots?: number[];
 }
 
@@ -20,7 +21,8 @@ export function generateWarnings(tandas: (Tanda | null)[]): Warning[] {
       warnings.push({
         id: `back-to-back-${i}`,
         type: "warning",
-        message: `Same orchestra back-to-back: ${name} (slots ${i + 1}-${i + 2})`,
+        messageKey: "warning_back_to_back",
+        messageParams: { name, from: i + 1, to: i + 2 },
         slots: [i, i + 1],
       });
     }
@@ -34,7 +36,8 @@ export function generateWarnings(tandas: (Tanda | null)[]): Warning[] {
       warnings.push({
         id: `consecutive-type-${i}`,
         type: "warning",
-        message: `3 consecutive ${a.type}s (slots ${i + 1}-${i + 3}) — add variety`,
+        messageKey: "warning_consecutive_type",
+        messageParams: { type: a.type, from: i + 1, to: i + 3 },
         slots: [i, i + 1, i + 2],
       });
     }
@@ -45,7 +48,8 @@ export function generateWarnings(tandas: (Tanda | null)[]): Warning[] {
     warnings.push({
       id: "no-vals-early",
       type: "warning",
-      message: "No vals in first 8 slots — dancers need variety",
+      messageKey: "warning_no_vals_early",
+      messageParams: {},
     });
   }
 
@@ -54,7 +58,8 @@ export function generateWarnings(tandas: (Tanda | null)[]): Warning[] {
     warnings.push({
       id: "no-milonga-early",
       type: "warning",
-      message: "No milonga in first 10 slots",
+      messageKey: "warning_no_milonga_early",
+      messageParams: {},
     });
   }
 
@@ -67,7 +72,13 @@ export function generateWarnings(tandas: (Tanda | null)[]): Warning[] {
         warnings.push({
           id: `energy-jump-${i}`,
           type: "warning",
-          message: `Energy jumps from ${current.energy.toFixed(1)} to ${next.energy.toFixed(1)} (slots ${i + 1}-${i + 2}) — consider a transition`,
+          messageKey: "warning_energy_jump",
+          messageParams: {
+            from: current.energy.toFixed(1),
+            to: next.energy.toFixed(1),
+            slotFrom: i + 1,
+            slotTo: i + 2,
+          },
           slots: [i, i + 1],
         });
       }
@@ -81,7 +92,8 @@ export function generateWarnings(tandas: (Tanda | null)[]): Warning[] {
       warnings.push({
         id: `complex-early-${i}`,
         type: "warning",
-        message: `${name} too early (slot ${i + 1}) — save for mid-evening when floor is warm`,
+        messageKey: "warning_complex_early",
+        messageParams: { name, slot: i + 1 },
         slots: [i],
       });
     }
@@ -98,7 +110,8 @@ export function generateWarnings(tandas: (Tanda | null)[]): Warning[] {
       warnings.push({
         id: "suggest-warmup",
         type: "suggestion",
-        message: `Consider ${recommended} for warm-up (first 2 slots)`,
+        messageKey: "warning_suggest_warmup",
+        messageParams: { names: recommended },
       });
     }
   }
@@ -109,7 +122,8 @@ export function generateWarnings(tandas: (Tanda | null)[]): Warning[] {
       warnings.push({
         id: "suggest-cumparsita",
         type: "suggestion",
-        message: "Tradition: end with La Cumparsita in the last slot",
+        messageKey: "warning_suggest_cumparsita",
+        messageParams: {},
       });
     }
   }
@@ -121,14 +135,16 @@ export function generateWarnings(tandas: (Tanda | null)[]): Warning[] {
       warnings.push({
         id: "low-tango-percent",
         type: "warning",
-        message: `Tango is only ${tangoPercent.toFixed(0)}% — should be 50-75%`,
+        messageKey: "warning_low_tango",
+        messageParams: { percent: tangoPercent.toFixed(0) },
       });
     }
     if (tangoPercent > 75) {
       warnings.push({
         id: "high-tango-percent",
         type: "warning",
-        message: `Tango is ${tangoPercent.toFixed(0)}% — consider more vals/milonga variety`,
+        messageKey: "warning_high_tango",
+        messageParams: { percent: tangoPercent.toFixed(0) },
       });
     }
   }
@@ -143,7 +159,8 @@ export function generateWarnings(tandas: (Tanda | null)[]): Warning[] {
       warnings.push({
         id: `overused-${id}`,
         type: "warning",
-        message: `${name} appears ${count} times — consider more variety`,
+        messageKey: "warning_overused",
+        messageParams: { name, count },
       });
     }
   });

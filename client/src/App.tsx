@@ -9,6 +9,8 @@ import { useEffect } from "react";
 import { Music, Library, BookOpen } from "lucide-react";
 import { storage } from "@/lib/storage";
 import { fetchOrchestras } from "@/lib/orchestraService";
+import { LanguageProvider, useLanguage } from "@/hooks/useLanguage";
+import type { Language } from "@/lib/translations";
 
 function Router() {
   return (
@@ -21,8 +23,34 @@ function Router() {
   );
 }
 
+const LANGUAGES: Language[] = ["en", "fr", "es"];
+
+function LanguageToggle() {
+  const { lang, setLang } = useLanguage();
+
+  return (
+    <div className="flex items-center rounded-md border border-border/30 overflow-hidden" data-testid="language-toggle">
+      {LANGUAGES.map((l) => (
+        <button
+          key={l}
+          onClick={() => setLang(l)}
+          className={`px-2 py-1 text-[11px] font-semibold uppercase transition-colors ${
+            lang === l
+              ? "bg-primary/20 text-primary"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+          data-testid={`button-lang-${l}`}
+        >
+          {l}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function NavBar() {
   const [location] = useLocation();
+  const { t } = useLanguage();
   const isPlanner = location.startsWith("/planner");
 
   if (isPlanner) return null;
@@ -39,34 +67,37 @@ function NavBar() {
           </span>
         </Link>
 
-        <nav className="flex items-center gap-1">
-          <Link href="/">
-            <span
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                location === "/"
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-              data-testid="link-my-sets"
-            >
-              <Library className="w-4 h-4" />
-              My Sets
-            </span>
-          </Link>
-          <Link href="/orchestras">
-            <span
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                location === "/orchestras"
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-              data-testid="link-orchestras"
-            >
-              <BookOpen className="w-4 h-4" />
-              Orchestras
-            </span>
-          </Link>
-        </nav>
+        <div className="flex items-center gap-3">
+          <nav className="flex items-center gap-1">
+            <Link href="/">
+              <span
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  location === "/"
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                data-testid="link-my-sets"
+              >
+                <Library className="w-4 h-4" />
+                {t("my_sets_nav")}
+              </span>
+            </Link>
+            <Link href="/orchestras">
+              <span
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  location === "/orchestras"
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                data-testid="link-orchestras"
+              >
+                <BookOpen className="w-4 h-4" />
+                {t("orchestras_nav")}
+              </span>
+            </Link>
+          </nav>
+          <LanguageToggle />
+        </div>
       </div>
     </header>
   );
@@ -80,15 +111,17 @@ function App() {
   }, []);
 
   return (
-    <TooltipProvider>
-      <div className="flex flex-col h-screen">
-        <NavBar />
-        <main className="flex-1 overflow-hidden">
-          <Router />
-        </main>
-      </div>
-      <Toaster />
-    </TooltipProvider>
+    <LanguageProvider>
+      <TooltipProvider>
+        <div className="flex flex-col h-screen">
+          <NavBar />
+          <main className="flex-1 overflow-hidden">
+            <Router />
+          </main>
+        </div>
+        <Toaster />
+      </TooltipProvider>
+    </LanguageProvider>
   );
 }
 

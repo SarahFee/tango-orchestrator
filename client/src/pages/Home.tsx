@@ -7,10 +7,12 @@ import { Plus, Calendar, MapPin, Music, ChevronRight, Clock, Upload, Download } 
 import { storage } from "@/lib/storage";
 import { EnergyBar } from "@/components/EnergyBar";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export default function Home() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [sets, setSets] = useState<MilongaSet[]>(() => storage.getAllSets());
   const [, setTick] = useState(0);
 
@@ -26,7 +28,7 @@ export default function Home() {
   const handleNewSet = () => {
     const today = new Date().toISOString().split("T")[0];
     const newSet = storage.createSet({
-      name: "New Milonga Set",
+      name: t("new_milonga_set"),
       date: today,
       startTime: "21:00",
       venue: null,
@@ -50,7 +52,7 @@ export default function Home() {
     a.download = `tangoflow_backup_${new Date().toISOString().split("T")[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    toast({ title: "Backup exported", description: "Your complete library has been saved." });
+    toast({ title: t("backup_exported"), description: t("backup_exported_desc") });
   };
 
   const handleImportAll = () => {
@@ -66,16 +68,16 @@ export default function Home() {
           const data = JSON.parse(ev.target?.result as string);
           if (data.set && data.tandas) {
             storage.importSet(data);
-            toast({ title: "Set imported", description: `"${data.set.name}" has been added to your library.` });
+            toast({ title: t("set_imported"), description: `"${data.set.name}" ${t("set_imported_desc")}` });
           } else if (data.sets && data.tandas) {
             storage.importAllData(data);
-            toast({ title: "Backup restored", description: `${data.sets.length} sets have been restored.` });
+            toast({ title: t("backup_restored"), description: `${data.sets.length} ${t("backup_restored_desc")}` });
           } else {
             throw new Error("Unrecognized format");
           }
           refresh();
         } catch {
-          toast({ title: "Import failed", description: "The file doesn't appear to be a valid TangoFlow backup.", variant: "destructive" });
+          toast({ title: t("import_failed"), description: t("import_failed_desc"), variant: "destructive" });
         }
       };
       reader.readAsText(file);
@@ -88,22 +90,22 @@ export default function Home() {
       <div className="flex items-end justify-between mb-8">
         <div>
           <h1 className="font-serif text-3xl md:text-4xl font-bold tracking-tight" data-testid="text-page-title">
-            My Sets
+            {t("my_sets")}
           </h1>
           <p className="text-muted-foreground mt-1 text-sm">
-            Plan your milonga evenings with precision and soul
+            {t("my_sets_subtitle")}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={handleImportAll} title="Import backup" data-testid="button-import">
+          <Button variant="ghost" size="icon" onClick={handleImportAll} title={t("import_backup")} data-testid="button-import">
             <Upload className="w-4 h-4" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={handleExportAll} title="Export backup" data-testid="button-export-all">
+          <Button variant="ghost" size="icon" onClick={handleExportAll} title={t("export_backup")} data-testid="button-export-all">
             <Download className="w-4 h-4" />
           </Button>
           <Button onClick={handleNewSet} data-testid="button-new-set">
             <Plus className="w-4 h-4 mr-1.5" />
-            New Set
+            {t("new_set")}
           </Button>
         </div>
       </div>
@@ -124,13 +126,13 @@ export default function Home() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
             <Music className="w-7 h-7 text-primary" />
           </div>
-          <h2 className="font-serif text-xl font-semibold mb-2">No sets yet</h2>
+          <h2 className="font-serif text-xl font-semibold mb-2">{t("no_sets_yet")}</h2>
           <p className="text-muted-foreground mb-6 max-w-sm mx-auto text-sm">
-            Create your first milonga set to start planning the perfect tango evening.
+            {t("no_sets_description")}
           </p>
           <Button onClick={handleNewSet} data-testid="button-create-first-set">
             <Plus className="w-4 h-4 mr-1.5" />
-            Create Your First Set
+            {t("create_first_set")}
           </Button>
         </div>
       )}
@@ -139,6 +141,7 @@ export default function Home() {
 }
 
 function SetCard({ set, onClick, onDelete }: { set: MilongaSet; onClick: () => void; onDelete: (e: React.MouseEvent) => void }) {
+  const { t } = useLanguage();
   const tandas = storage.getTandasForSet(set.id);
   const filledTandas = tandas.filter((t) => t.position !== null);
   const avgEnergy =
@@ -171,19 +174,19 @@ function SetCard({ set, onClick, onDelete }: { set: MilongaSet; onClick: () => v
         )}
         <div className="flex items-center gap-1.5">
           <Clock className="w-3 h-3" />
-          <span>Starts {set.startTime}</span>
+          <span>{t("starts")} {set.startTime}</span>
         </div>
       </div>
 
       <div className="flex items-center gap-4 text-xs border-t border-border/30 pt-3">
         <div>
-          <span className="text-muted-foreground">Tandas: </span>
+          <span className="text-muted-foreground">{t("tandas")}: </span>
           <span className="font-medium tabular-nums">{filledTandas.length}</span>
         </div>
         {filledTandas.length > 0 && (
           <>
             <div>
-              <span className="text-muted-foreground">Orchestras: </span>
+              <span className="text-muted-foreground">{t("orchestras")}: </span>
               <span className="font-medium tabular-nums">{uniqueOrchestras}</span>
             </div>
             <div className="flex-1">

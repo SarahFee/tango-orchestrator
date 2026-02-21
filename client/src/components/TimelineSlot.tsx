@@ -7,6 +7,7 @@ import { X, GripVertical } from "lucide-react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useDroppable } from "@dnd-kit/core";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface TimelineSlotProps {
   index: number;
@@ -27,6 +28,7 @@ export function TimelineSlot({
   onRemove,
   highlightSlots = [],
 }: TimelineSlotProps) {
+  const { t } = useLanguage();
   const patternLabel = getTTVTTMLabel(index);
   const expectedType = getExpectedType(index);
   const mismatch = tanda && showPattern && tanda.type !== expectedType;
@@ -137,7 +139,7 @@ export function TimelineSlot({
             </div>
           ) : (
             <div className="flex-1 flex items-center justify-center p-2">
-              <p className="text-xs text-muted-foreground/40 italic">Drop tanda here</p>
+              <p className="text-xs text-muted-foreground/40 italic">{t("drop_tanda_here")}</p>
             </div>
           )}
         </div>

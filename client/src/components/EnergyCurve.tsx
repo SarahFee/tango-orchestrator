@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import type { Tanda } from "@shared/schema";
 import { TANGO_COLORS } from "@/lib/tangoColors";
 import { getEnergyColor } from "@/lib/tangoColors";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface EnergyCurveProps {
   tandas: (Tanda | null)[];
@@ -9,6 +10,7 @@ interface EnergyCurveProps {
 }
 
 export function EnergyCurve({ tandas, className = "" }: EnergyCurveProps) {
+  const { t } = useLanguage();
   const filledPoints = useMemo(() => {
     return tandas
       .map((t, i) => (t ? { index: i, energy: t.energy, type: t.type } : null))
@@ -19,7 +21,7 @@ export function EnergyCurve({ tandas, className = "" }: EnergyCurveProps) {
     return (
       <div className={`flex items-center justify-center ${className}`} data-testid="energy-curve-empty">
         <p className="text-sm text-muted-foreground font-serif italic">
-          Add at least 2 tandas to see the energy curve
+          {t("energy_curve_empty")}
         </p>
       </div>
     );

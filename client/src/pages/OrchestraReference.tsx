@@ -12,9 +12,11 @@ import { Search, Music, Info, ChevronDown, ChevronUp, RefreshCw, ExternalLink, L
 import type { Orchestra } from "@shared/schema";
 import { useOrchestras } from "@/hooks/useOrchestras";
 import { SUGGEST_ORCHESTRA_URL } from "@/lib/orchestraService";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export default function OrchestraReference() {
   const { orchestras, loading, lastSynced, source, error, refresh } = useOrchestras();
+  const { t } = useLanguage();
   const [search, setSearch] = useState("");
   const [styleFilter, setStyleFilter] = useState("all");
   const [energyRange, setEnergyRange] = useState([1, 10]);
@@ -44,10 +46,10 @@ export default function OrchestraReference() {
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <h1 className="font-serif text-3xl md:text-4xl font-bold tracking-tight" data-testid="text-orchestra-title">
-              Orchestra Reference
+              {t("orchestra_reference")}
             </h1>
             <p className="text-muted-foreground mt-1 text-sm">
-              Browse the golden age and beyond — {orchestras.length} orchestras
+              {t("orchestra_ref_count", { subtitle: t("orchestra_ref_subtitle"), count: orchestras.length })}
             </p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
@@ -58,7 +60,7 @@ export default function OrchestraReference() {
               data-testid="button-suggest-orchestra"
             >
               <ExternalLink className="w-3.5 h-3.5 mr-1.5" />
-              Suggest Orchestra
+              {t("suggest_orchestra")}
             </Button>
             <Button
               variant="ghost"
@@ -83,13 +85,13 @@ export default function OrchestraReference() {
             <HardDrive className="w-3 h-3" />
           )}
           {loading ? (
-            <span>Syncing...</span>
+            <span>{t("syncing")}</span>
           ) : lastSynced ? (
-            <span>Last synced: {lastSynced.toLocaleTimeString()}</span>
+            <span>{t("last_synced")}: {lastSynced.toLocaleTimeString()}</span>
           ) : error ? (
-            <span>Using built-in data (sync failed)</span>
+            <span>{t("using_builtin_sync_failed")}</span>
           ) : (
-            <span>Using built-in data</span>
+            <span>{t("using_builtin_data")}</span>
           )}
         </div>
       </div>
@@ -98,7 +100,7 @@ export default function OrchestraReference() {
         <div className="relative flex-1 min-w-[200px] max-w-sm">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search orchestras..."
+            placeholder={t("search_orchestras_ref")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9"
@@ -107,10 +109,10 @@ export default function OrchestraReference() {
         </div>
         <Select value={styleFilter} onValueChange={setStyleFilter}>
           <SelectTrigger className="w-44" data-testid="select-style-filter">
-            <SelectValue placeholder="All styles" />
+            <SelectValue placeholder={t("all_styles")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Styles</SelectItem>
+            <SelectItem value="all">{t("all_styles")}</SelectItem>
             {Object.keys(styleCategories).map((s) => (
               <SelectItem key={s} value={s}>
                 {getStyleLabel(s)}
@@ -119,7 +121,7 @@ export default function OrchestraReference() {
           </SelectContent>
         </Select>
         <div className="flex items-center gap-2 min-w-[180px]">
-          <span className="text-xs text-muted-foreground whitespace-nowrap">Energy {energyRange[0]}-{energyRange[1]}</span>
+          <span className="text-xs text-muted-foreground whitespace-nowrap">{t("energy")} {energyRange[0]}-{energyRange[1]}</span>
           <Slider
             value={energyRange}
             onValueChange={setEnergyRange}
@@ -133,7 +135,7 @@ export default function OrchestraReference() {
       </div>
 
       <div className="text-xs text-muted-foreground mb-4">
-        {filtered.length} orchestra{filtered.length !== 1 ? "s" : ""} found
+        {t("orchestras_found", { count: filtered.length })}
       </div>
 
       <div className="space-y-3">
@@ -150,7 +152,7 @@ export default function OrchestraReference() {
       {filtered.length === 0 && (
         <div className="text-center py-16">
           <Music className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-          <p className="text-muted-foreground">No orchestras match your filters</p>
+          <p className="text-muted-foreground">{t("no_orchestras_match")}</p>
         </div>
       )}
     </div>
@@ -166,6 +168,7 @@ function OrchestraCard({
   isExpanded: boolean;
   onToggle: () => void;
 }) {
+  const { t } = useLanguage();
   const mainProfile = orchestra.profiles[0];
   const styleColor = STYLE_COLORS[mainProfile.style] || "#888";
 
@@ -223,33 +226,33 @@ function OrchestraCard({
                 </Badge>
                 {profile.confidence && (
                   <span className="text-[10px] text-muted-foreground/60">
-                    Confidence: {profile.confidence}
+                    {t("confidence")}: {profile.confidence}
                   </span>
                 )}
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
                 <div>
-                  <span className="text-muted-foreground">Energy</span>
+                  <span className="text-muted-foreground">{t("energy")}</span>
                   <EnergyBar energy={profile.energy} size="sm" />
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Danceability</span>
+                  <span className="text-muted-foreground">{t("danceability")}</span>
                   <p className="font-medium tabular-nums">{profile.danceability}/10</p>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Complexity</span>
+                  <span className="text-muted-foreground">{t("complexity")}</span>
                   <p className="font-medium tabular-nums">{profile.complexity}/10</p>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Mood</span>
+                  <span className="text-muted-foreground">{t("mood")}</span>
                   <p className="font-medium capitalize">{profile.mood}</p>
                 </div>
               </div>
 
               {profile.key_singers && profile.key_singers.length > 0 && (
                 <div>
-                  <span className="text-xs text-muted-foreground">Key singers: </span>
+                  <span className="text-xs text-muted-foreground">{t("key_singers")}: </span>
                   <span className="text-xs font-medium">{profile.key_singers.join(", ")}</span>
                 </div>
               )}
