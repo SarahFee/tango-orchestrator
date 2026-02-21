@@ -1,4 +1,4 @@
-import { Switch, Route, Link, useLocation } from "wouter";
+import { Switch, Route, Link, useLocation, Router as WouterRouter } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
@@ -12,7 +12,9 @@ import { fetchOrchestras } from "@/lib/orchestraService";
 import { LanguageProvider, useLanguage } from "@/hooks/useLanguage";
 import type { Language } from "@/lib/translations";
 
-function Router() {
+const BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+function AppRouter() {
   return (
     <Switch>
       <Route path="/" component={Home} />
@@ -111,17 +113,19 @@ function App() {
   }, []);
 
   return (
-    <LanguageProvider>
-      <TooltipProvider>
-        <div className="flex flex-col h-screen">
-          <NavBar />
-          <main className="flex-1 overflow-y-auto">
-            <Router />
-          </main>
-        </div>
-        <Toaster />
-      </TooltipProvider>
-    </LanguageProvider>
+    <WouterRouter base={BASE_PATH}>
+      <LanguageProvider>
+        <TooltipProvider>
+          <div className="flex flex-col h-screen">
+            <NavBar />
+            <main className="flex-1 overflow-y-auto">
+              <AppRouter />
+            </main>
+          </div>
+          <Toaster />
+        </TooltipProvider>
+      </LanguageProvider>
+    </WouterRouter>
   );
 }
 
