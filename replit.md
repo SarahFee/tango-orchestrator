@@ -15,26 +15,36 @@ Fully functional static SPA with dark tango theme, 3 main pages (Home, Set Plann
 - **Key Libraries**: @dnd-kit (drag-and-drop), wouter (routing)
 
 ### Important: This is a fully static client-side app
-- NO backend server, NO database, NO API calls
-- All data persisted in browser localStorage
-- Orchestra database embedded as JSON constants
+- NO backend server, NO database
+- All user data persisted in browser localStorage
+- Orchestra data fetched from Google Sheet CSV at runtime, with hardcoded fallback
 - Build output is pure HTML/CSS/JS
 
 ### Project Structure
 ```
 shared/schema.ts          - Plain TypeScript types (MilongaSet, Tanda, Orchestra interfaces)
 client/src/lib/storage.ts  - localStorage CRUD + import/export + seed data
-client/src/App.tsx         - Root component with routing and navbar
+client/src/lib/orchestraService.ts - Google Sheet CSV fetcher, parser, in-memory cache, fallback
+client/src/lib/orchestraData.ts - Hardcoded fallback orchestra data (20+ profiles) + helper functions
+client/src/hooks/useOrchestras.ts - React hook for reactive orchestra data via useSyncExternalStore
+client/src/App.tsx         - Root component with routing, navbar, triggers fetchOrchestras on mount
 client/src/pages/Home.tsx  - Set list with create, import, export backup
 client/src/pages/SetPlanner.tsx - Main 3-column planner (library | timeline | stats)
-client/src/pages/OrchestraReference.tsx - Browsable orchestra database
+client/src/pages/OrchestraReference.tsx - Browsable orchestra database with sync status, suggest button
 client/src/components/     - Reusable UI components
-client/src/lib/orchestraData.ts - 20+ orchestra profiles with detailed metadata
 client/src/lib/warnings.ts - 10+ validation rules for DJ best practices
 client/src/lib/tangoColors.ts - Color system for types, styles, and energy
 server/index.ts            - Dev server entry (starts Vite dev server)
 build.js                   - Static build script
 ```
+
+### Orchestra Data Flow
+- On app load, `fetchOrchestras()` fetches CSV from configurable Google Sheet URL
+- CSV parsed into Orchestra objects grouped by ID (rows with same ID = multiple profiles)
+- Cached in memory for the session; components read via `getOrchestras()` or `useOrchestras()` hook
+- If fetch fails (offline, bad URL), falls back to hardcoded DEFAULT_ORCHESTRAS in orchestraData.ts
+- Google Sheet URL and Suggest URL are configurable constants in orchestraService.ts
+- Expected CSV columns: id, name, nickname, instrument, active_years, era, era_label, style, energy, mood, danceability, complexity, dj_notes, key_singers (semicolon-separated), tags (semicolon-separated), confidence
 
 ### localStorage Keys
 - `tangoflow_sets` - Array of MilongaSet objects
