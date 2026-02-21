@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [
     react(),
   ],
+  base: "/tango-orchestrator/",
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
